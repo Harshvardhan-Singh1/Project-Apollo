@@ -1,0 +1,85 @@
+---
+title: "Research Title Analysis"
+author: "Charles J. Gomez, Harshvardhan Singh"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading data for quanteda
+
+```{r}
+# Load the library
+library(keyATM)
+library(quanteda)
+library(readtext)
+
+
+# Read the CSV file
+data <- read.csv("INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv")
+text_data <- data$title
+
+# Preprocessing
+key_corpus <- corpus(text_data)
+
+# Covariate data
+covariate_data <- data[, c("publication_year", "country")]
+key_corpus <- corpus(text_data, docvars = covariate_data)
+#docvars(key_corpus, c("publication_year", "country")) <- covariate_data
+
+#Creating token object
+key_token <- tokens(key_corpus)
+
+# Createing a document-feature matrix (dfm object) from the token object
+key_dfm <- dfm(key_token)
+
+```
+
+## Preprocessing data
+
+```{r}
+
+library(keyATM)
+library(quanteda)
+library(magrittr)
+
+#remove punctuations and unnecessary characters
+data_tokens <- tokens(
+    data$title,
+    remove_numbers = FALSE,
+    remove_punct = TRUE,
+    remove_symbols = TRUE,
+    remove_separators = TRUE,
+    remove_url = TRUE
+  ) %>%
+  tokens_tolower() %>%    #converts all characters into lower cases
+  tokens_remove(
+    c(stopwords("english"),
+      "may", "shall", "can",
+      "must", "upon", "with", "without"
+    )
+  ) %>%
+  tokens_select(min_nchar = 3)
+
+#Before loading data into the keyATM, construct a document-feature matrix (dfm object)
+data_dfm <- dfm(data_tokens) %>%
+              dfm_trim(min_termfreq = 5, min_docfreq = 2)
+ncol(data_dfm)  # the number of unique words
+
+
+# Filter out documents with length 0
+#data_dfm <- data_dfm[ndoc(data_dfm) > 0, ]
+data_dfm <- dfm_subset(data_dfm, ntoken(data_dfm) > 0)
+
+# Read the document-feature matrix using keyATM_read()
+keyATM_docs <- keyATM_read(texts = data_dfm)
+
+# Summary of keyATM_docs
+summary(keyATM_docs)
+
+```
+
+
