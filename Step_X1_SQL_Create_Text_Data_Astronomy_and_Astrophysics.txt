@@ -1,0 +1,70 @@
+**************************************************
+## Step 1
+## Athena 
+**************************************************
+
+# level 1
+https://openalex.org/C44870925 #Astrophysics
+https://openalex.org/C1276947 #Astronomy
+
+# level 2
+https://openalex.org/C87355193 #Astrobiology
+https://openalex.org/C26405456 #Cosmology
+
+Select  concept_id, 
+		work_id, 
+		publication_year, 
+		title, 
+		paperabstract, 
+		country,
+		concat(publication_year,'+',concept_id) as year_concept
+FROM
+(Select txt.concept_id,
+			txt.work_id,
+			txt.publication_year,
+			txt.title,
+			REPLACE(REPLACE(REPLACE(txt.paperabstract, '\t', ''),'\n',''),'\r','') AS paperabstract,
+			code.country
+FROM (
+		SELECT DISTINCT concept_ids.concept_id,
+			concept_ids.work_id,
+			abstract.publication_year,
+			abstract.title,
+			abstract.paperabstract
+		FROM (
+				Select CIDS.concept_id,
+					WCIDS.work_id
+				FROM "open_alex"."works_concepts" WCIDS
+					JOIN "open_alex"."concepts_ids" as CIDS ON WCIDS.concept_id = CIDS.concept_ID
+					JOIN "open_alex"."concepts" as CON ON WCIDS.concept_id = CON.ID
+
+               WHERE CIDS.concept_id in ('https://openalex.org/C44870925','https://openalex.org/C1276947')
+			) as concept_ids
+			JOIN (
+				SELECT DISTINCT id,
+					title,
+					paperabstract,
+					publication_year
+				FROM "open_alex"."semantic_works"
+				WHERE type = 'journal-article'
+					AND paperabstract <> ''
+			) as abstract ON abstract.id = concept_ids.work_id
+	) as txt
+	JOIN (
+		Select work_id,
+			array_join(array_agg(concat(country_code,'+',author_position)), ' ') as country
+		From (
+				SELECT work_id,
+					institution_id,
+					author_position
+				FROM "open_alex"."works_authorships"
+			) auth
+			join(
+				SELECT id,
+					country_code
+				FROM "open_alex"."institutions"
+			) inst ON inst.id = auth.institution_id
+		group by work_id
+	) as code ON code.work_id = txt.work_id
+WHERE txt.concept_id like 'https://openalex.org/%')
+
