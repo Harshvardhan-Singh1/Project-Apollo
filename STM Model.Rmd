@@ -2,17 +2,34 @@
 title: "STM Model"
 author: "Charlie J. Gomez, Harshvardhan Singh"
 date: "`r Sys.Date()`"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Data Pre-Processing
+## Titles Analysis
 
-```{r}
-data = read.csv("INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv")
+```{r cache=TRUE}
+#Read data
+data_original = read.csv("INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv")
+
+start_column <- which(names(data_original) == "publication_year")
+end_column <- which(names(data_original) == "country")
+
+data_forSampling <- data_original[, start_column:end_column]
+
+
+set.seed(123)  
+#sample_size <- 21000  
+sample_size <- 8000
+sample_rows <- sample(nrow(data_forSampling), sample_size)
+data <- data_forSampling[sample_rows, ]
+#data = read.csv("INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv")
+
 library('stm')
 
 #pre-processing the titles
@@ -23,4 +40,43 @@ vocab_titles <- out_titles$vocab
 meta_titles <- out_titles$meta
 
 
+#Prepare data
+plotRemoved(processed_titles$documents, lower.thresh = seq(1, 200, by = 100))
+out_titles <- prepDocuments(processed_titles$documents, processed_titles$vocab, processed_titles$meta, lower.thresh = 15)
+
+str(out_titles$meta)
+
+#Estimating the structural topic model
+#poliblogPrevFit_titles <- stm(documents = out_titles$documents, 
+#                              vocab = out_titles$vocab, 
+#                              K = 20, 
+#                              prevalence = ~publication_year + country, 
+#                              max.em.its = 75, 
+#                              data = out_titles$meta, 
+#                              init.type = "Spectral")
+
+poliblogPrevFit_titles <- stm(documents = out_titles$documents, 
+                              vocab = out_titles$vocab, 
+                              K = 20, 
+                              prevalence = ~publication_year + country, 
+                              data = out_titles$meta, 
+                              init.type = "Spectral",
+                              max.em.its = 1000,
+                              gamma.prior = 'L1')
+
+
+#poliblogSelect <- selectModel(out_titles$documents, 
+#                              out_titles$vocab, 
+#                              K = 20, 
+#                              prevalence = ~publication_year + country, 
+#                              max.em.its = 1000, 
+#                              data = out_titles$meta, 
+#                              runs = 20, #try 2
+#                              seed = 8458159)
+
+
+
+
+
 ```
+

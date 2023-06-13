@@ -23,3 +23,95 @@ meta <- out$meta
 
 
 ```
+## Abstracts Analysis
+
+```{r}
+
+#pre-processing abstracts
+processed_abstracts <- textProcessor(data$paperabstract, metadata = data) 
+out_abstracts <- prepDocuments(processed_abstracts$documents, processed_abstracts$vocab, processed_abstracts$meta)
+docs_abstracts <- out_abstracts$documents
+vocab_abstracts <- out_abstracts$vocab
+meta_abstracts <- out_abstracts$meta
+
+#Prepare data
+plotRemoved(processed_abstracts$documents, lower.thresh = seq(1, 200, by = 100))
+out_abstracts <- prepDocuments(processed_abstracts$documents, processed_abstracts$vocab, processed_abstracts$meta, lower.thresh = 15)
+
+#Estimating the structural topic model
+poliblogPrevFit_abstracts <- stm(documents = out_abstracts$documents, 
+                              vocab = out_abstracts$vocab, 
+                              K = 20, 
+                              prevalence = ~publication_year + country, 
+                              max.em.its = 75, 
+                              data = out_abstracts$meta, 
+                              init.type = "Spectral")
+
+poliblogPrevFit_abstracts
+
+
+```
+Testing -
+```{r}
+#Read data
+data_original = read.csv("INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv")
+
+start_column <- which(names(data_original) == "publication_year")
+end_column <- which(names(data_original) == "country")
+
+data_forSampling <- data_original[, start_column:end_column]
+
+
+set.seed(123)  
+#sample_size <- 21000  
+sample_size <- 8000
+sample_rows <- sample(nrow(data_forSampling), sample_size)
+data <- data_forSampling[sample_rows, ]
+#data = read.csv("INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv")
+
+library('stm')
+
+#pre-processing the titles
+processed_titles <- textProcessor(data$title, metadata = data) 
+out_titles <- prepDocuments(processed_titles$documents, processed_titles$vocab, processed_titles$meta)
+docs_titles <- out_titles$documents
+vocab_titles <- out_titles$vocab
+meta_titles <- out_titles$meta
+
+
+#Prepare data
+plotRemoved(processed_titles$documents, lower.thresh = seq(1, 200, by = 100))
+out_titles <- prepDocuments(processed_titles$documents, processed_titles$vocab, processed_titles$meta, lower.thresh = 15)
+
+str(out_titles$meta)
+
+#Estimating the structural topic model
+#poliblogPrevFit_titles <- stm(documents = out_titles$documents, 
+#                              vocab = out_titles$vocab, 
+#                              K = 20, 
+#                              prevalence = ~publication_year + country, 
+#                              max.em.its = 75, 
+#                              data = out_titles$meta, 
+#                              init.type = "Spectral")
+
+poliblogPrevFit_titles <- stm(documents = out_titles$documents, 
+                              vocab = out_titles$vocab, 
+                              K = 20, 
+                              prevalence = ~publication_year + country, 
+                              data = out_titles$meta, 
+                              init.type = "Spectral",
+                              max.em.its = 1000,
+                              gamma.prior = 'L1')
+
+
+poliblogSelect_titles <- selectModel(out_titles$documents, 
+                              out_titles$vocab, 
+                              K = 20, 
+                              prevalence = ~publication_year + country, 
+                              max.em.its = 10, 
+                              data = out_titles$meta, 
+                              runs = 2, #20
+                              seed = 159) #8458159
+
+
+```
