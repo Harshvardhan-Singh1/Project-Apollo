@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Titles Analysis
 
-```{r cache=TRUE}
+```{r}
 #Read data
 data_original = read.csv("INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv")
 

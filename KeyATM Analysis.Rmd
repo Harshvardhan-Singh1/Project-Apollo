@@ -1,8 +1,10 @@
 ---
-title: "Research Title Analysis"
+title: "Research Title Analysis (KeyATM)"
 author: "Charles J. Gomez, Harshvardhan Singh"
 date: "`r Sys.Date()`"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -81,5 +83,47 @@ keyATM_docs <- keyATM_read(texts = data_dfm)
 summary(keyATM_docs)
 
 ```
+Preparing keywords
 
+```{r}
+keywords <- list(
+ Topic1 = c("burst", "gamma-ray", "quasar", "line", "discoveri"), 
+ Topic2 = c("variabl", "studi", "ngc", "galaxi", "ultraviolet"), 
+ Topic3 = c("solar", "use", "measur", "infrar", "variat"), 
+ Topic4 = c("binari", "hole", "black", "accret", "system"), 
+ Topic5 = c("dwarf", "planet", "star", "disk", "around"), 
+ Topic6 = c("star", "cluster", "format", "massiv", "globular"), 
+ Topic7 = c("supernova", "type", "remnant", "spectra", "light"), 
+ Topic8 = c("nebula", "planetari", "wind", "young", "outflow"), 
+ Topic9 = c("galaxi", "redshift", "survey", "sky", "high"), 
+ Topic10 = c("galaxi", "structur", "gas", "spiral", "local"), 
+ Topic11 = c("model", "distribut", "univers", "energi", "cosmic"), 
+ Topic12 = c("dust", "abund", "interstellar", "comet", "chemic"), 
+ Topic13 = c("magnet", "field", "solar", "coron", "shock"), 
+ Topic14 = c("gravit", "effect", "lens", "background", "cosmic"), 
+ Topic15 = c("x-ray", "radio", "emiss", "pulsar", "sourc"), 
+ Topic16 = c("galact", "activ", "stellar", "region", "luminos"), 
+ Topic17 = c("observ", "cloud", "chandra", "magellan", "molecular"), 
+ Topic18 = c("survey", "telescop", "imag", "space", "hubbl"), 
+ Topic19 = c("dark", "halo", "matter", "galaxi", "mass"), 
+ Topic20 = c("new", "evid", "origin", "rotat", "dynam")
+)
 
+```
+Checking Keywords
+```{r}
+key_viz <- visualize_keywords(docs = keyATM_docs, keywords = keywords)
+key_viz
+
+#save figure
+key_viz <- visualize_keywords(docs = keyATM_docs, keywords = keywords)
+save_fig(key_viz, "/Users/harshvardhansingh/Documents/keyword.pdf", width = 6.5, height = 4)
+
+#get the actual values
+values_fig(key_viz)
+```
+Preparing Covariates
+```{r}
+vars <- docvars(key_dfm)
+head(vars)
+```
