@@ -1,0 +1,107 @@
+---
+title: KeyATM Analysis on Research Titles with KeyATM unsupervised keyword extraction
+  method
+author: "Charlie J. Gomez, Harshvardhan Singh"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading Data
+```{r}
+# Load the library
+library(keyATM)
+library(quanteda)
+library(readtext)
+
+
+# Read the CSV file
+data <- read.csv("INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv")
+text_data <- data$title
+
+# Preprocessing
+key_corpus <- corpus(text_data)
+
+# Covariate data
+covariate_data <- data[, c("publication_year", "country")]
+key_corpus <- corpus(text_data, docvars = covariate_data)
+#docvars(key_corpus, c("publication_year", "country")) <- covariate_data
+
+#Creating token object
+key_token <- tokens(key_corpus)
+
+# Createing a document-feature matrix (dfm object) from the token object
+key_dfm <- dfm(key_token)
+
+```
+
+## Preprocessing data
+
+```{r}
+
+library(keyATM)
+library(quanteda)
+library(magrittr)
+
+#remove punctuations and unnecessary characters
+data_tokens <- tokens(
+    data$title,
+    remove_numbers = FALSE,
+    remove_punct = TRUE,
+    remove_symbols = TRUE,
+    remove_separators = TRUE,
+    remove_url = TRUE
+  ) %>%
+  tokens_tolower() %>%    #converts all characters into lower cases
+  tokens_remove(
+    c(stopwords("english"),
+      "may", "shall", "can",
+      "must", "upon", "with", "without"
+    )
+  ) %>%
+  tokens_select(min_nchar = 3)
+
+#Before loading data into the keyATM, construct a document-feature matrix (dfm object)
+data_dfm <- dfm(data_tokens) %>%
+              dfm_trim(min_termfreq = 5, min_docfreq = 2)
+ncol(data_dfm)  # the number of unique words
+
+
+# Filter out documents with length 0
+#data_dfm <- data_dfm[ndoc(data_dfm) > 0, ]
+data_dfm <- dfm_subset(data_dfm, ntoken(data_dfm) > 0)
+
+# Read the document-feature matrix using keyATM_read()
+keyATM_docs <- keyATM_read(texts = data_dfm)
+
+# Summary of keyATM_docs
+summary(keyATM_docs)
+```
+
+## Keyword Extraction
+```{r}
+set.seed(225)  # set the seed before split the dfm
+docs_withSplit <- keyATM_read(texts = data_dfm,
+                              split = 0.3)  # split each document
+
+out <- weightedLDA(
+  docs              = docs_withSplit$W_split,  # 30% of the corpus
+  number_of_topics  = 10,  # the number of potential themes in the corpus
+  model             = "base",
+  options           = list(seed = 250)
+)
+top_words(out)  # top words can aid selecting keywords
+
+out <- keyATM(
+  docs              = docs_withSplit,  # 70% of the corpus
+  no_keyword_topics = 5,               # number of topics without keywords
+  keywords          = keywords,        # selected keywords
+  model             = "base",          # select the model
+  options           = list(seed = 250)
+)
+```
