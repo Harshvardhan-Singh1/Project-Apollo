@@ -9,11 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Charles J. Gomez, Harshvardhan Singh" />
+<meta name="author" content="Charlie J. Gomez, Harshvardhan Singh" />
 
 <meta name="date" content="2023-06-12" />
 
-<title>Research Title Analysis</title>
+<title>STM Model</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -356,174 +356,35 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Research Title Analysis</h1>
-<h4 class="author">Charles J. Gomez, Harshvardhan Singh</h4>
+<h1 class="title toc-ignore">STM Model</h1>
+<h4 class="author">Charlie J. Gomez, Harshvardhan Singh</h4>
 <h4 class="date">2023-06-12</h4>
 
 </div>
 
 
-<div id="loading-data-for-quanteda" class="section level2">
-<h2>Loading data for quanteda</h2>
-<pre class="r"><code># Load the library
-library(keyATM)</code></pre>
-<pre><code>## keyATM 0.5.0 successfully loaded.
-##  Papers, examples, resources, and other materials are at
-##  https://keyatm.github.io/keyATM/</code></pre>
-<pre class="r"><code>library(quanteda)</code></pre>
-<pre><code>## Package version: 3.3.1
-## Unicode version: 14.0
-## ICU version: 70.1</code></pre>
-<pre><code>## Parallel computing: 8 of 8 threads used.</code></pre>
-<pre><code>## See https://quanteda.io for tutorials and examples.</code></pre>
-<pre class="r"><code>library(readtext)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;readtext&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:quanteda&#39;:
-## 
-##     texts</code></pre>
-<pre class="r"><code># Read the CSV file
-data &lt;- read.csv(&quot;INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv&quot;)
-text_data &lt;- data$title
-
-# Preprocessing
-key_corpus &lt;- corpus(text_data)
-
-# Covariate data
-covariate_data &lt;- data[, c(&quot;publication_year&quot;, &quot;country&quot;)]
-key_corpus &lt;- corpus(text_data, docvars = covariate_data)
-#docvars(key_corpus, c(&quot;publication_year&quot;, &quot;country&quot;)) &lt;- covariate_data
-
-#Creating token object
-key_token &lt;- tokens(key_corpus)
-
-# Createing a document-feature matrix (dfm object) from the token object
-key_dfm &lt;- dfm(key_token)</code></pre>
-</div>
-<div id="preprocessing-data" class="section level2">
-<h2>Preprocessing data</h2>
-<pre class="r"><code>library(keyATM)
-library(quanteda)
-library(magrittr)
-
-#remove punctuations and unnecessary characters
-data_tokens &lt;- tokens(
-    data$title,
-    remove_numbers = FALSE,
-    remove_punct = TRUE,
-    remove_symbols = TRUE,
-    remove_separators = TRUE,
-    remove_url = TRUE
-  ) %&gt;%
-  tokens_tolower() %&gt;%    #converts all characters into lower cases
-  tokens_remove(
-    c(stopwords(&quot;english&quot;),
-      &quot;may&quot;, &quot;shall&quot;, &quot;can&quot;,
-      &quot;must&quot;, &quot;upon&quot;, &quot;with&quot;, &quot;without&quot;
-    )
-  ) %&gt;%
-  tokens_select(min_nchar = 3)
-
-#Before loading data into the keyATM, construct a document-feature matrix (dfm object)
-data_dfm &lt;- dfm(data_tokens) %&gt;%
-              dfm_trim(min_termfreq = 5, min_docfreq = 2)
-ncol(data_dfm)  # the number of unique words</code></pre>
-<pre><code>## [1] 6327</code></pre>
-<pre class="r"><code># Filter out documents with length 0
-#data_dfm &lt;- data_dfm[ndoc(data_dfm) &gt; 0, ]
-data_dfm &lt;- dfm_subset(data_dfm, ntoken(data_dfm) &gt; 0)
-
-# Read the document-feature matrix using keyATM_read()
-keyATM_docs &lt;- keyATM_read(texts = data_dfm)</code></pre>
-<pre><code>## ℹ Using quanteda dfm.</code></pre>
-<pre><code>## Loading documents ■■■■■■■■ 23% | ETA: 4s Loading documents
-## ■■■■■■■■■ 26% | ETA: 4s Loading documents ■■■■■■■■■
-## 28% | ETA: 4s Loading documents ■■■■■■■■■■ 30% | ETA: 4s
-## Loading documents ■■■■■■■■■■■ 32% | ETA: 4s Loading documents
-## ■■■■■■■■■■■ 34% | ETA: 4s Loading documents ■■■■■■■■■■■■
-## 36% | ETA: 4s Loading documents ■■■■■■■■■■■■ 38% |
-## ETA: 4s Loading documents ■■■■■■■■■■■■■ 40% | ETA: 4s
-## Loading documents ■■■■■■■■■■■■■ 41% | ETA: 4s Loading
-## documents ■■■■■■■■■■■■■■ 43% | ETA: 4s Loading
-## documents ■■■■■■■■■■■■■■ 45% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■ 46% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■ 47% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■ 49% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■ 50% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■ 52% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■ 53% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■ 54% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■■ 55% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■■ 57% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■■ 58% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■■■ 59% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■■■ 59% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■■■ 60% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■■■ 61% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■ 62% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■ 63% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■ 64% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■ 66% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■ 67% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■ 68% | ETA: 4s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■ 69% | ETA: 3s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■ 69% | ETA: 3s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■ 70% | ETA: 3s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■ 71% | ETA: 3s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■ 72% | ETA: 3s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■ 73% | ETA: 3s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■ 74% | ETA: 3s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■ 75% | ETA: 3s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■ 76% | ETA: 3s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■ 77% | ETA: 3s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■ 77% | ETA: 3s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■ 78% | ETA: 3s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■■ 79% | ETA: 3s Loading
-## documents ■■■■■■■■■■■■■■■■■■■■■■■■■ 80% | ETA: 3s
-## Loading documents ■■■■■■■■■■■■■■■■■■■■■■■■■ 81% |
-## ETA: 3s Loading documents ■■■■■■■■■■■■■■■■■■■■■■■■■
-## 82% | ETA: 2s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■■■ 82% | ETA: 2s Loading
-## documents ■■■■■■■■■■■■■■■■■■■■■■■■■■ 83% | ETA: 2s
-## Loading documents ■■■■■■■■■■■■■■■■■■■■■■■■■■ 84% |
-## ETA: 2s Loading documents ■■■■■■■■■■■■■■■■■■■■■■■■■■
-## 85% | ETA: 2s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■■■■ 86% | ETA: 2s Loading
-## documents ■■■■■■■■■■■■■■■■■■■■■■■■■■■ 86% | ETA: 2s
-## Loading documents ■■■■■■■■■■■■■■■■■■■■■■■■■■■ 87% |
-## ETA: 2s Loading documents ■■■■■■■■■■■■■■■■■■■■■■■■■■■
-## 88% | ETA: 2s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 89% | ETA: 2s Loading
-## documents ■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 89% | ETA:
-## 2s Loading documents ■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-## 90% | ETA: 1s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 91% | ETA: 1s Loading
-## documents ■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 91% | ETA:
-## 1s Loading documents ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-## 92% | ETA: 1s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 93% | ETA: 1s Loading
-## documents ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 93% | ETA:
-## 1s Loading documents ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-## 94% | ETA: 1s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 95% | ETA: 1s
-## Loading documents ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-## 95% | ETA: 1s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 96% | ETA: 1s
-## Loading documents ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-## 96% | ETA: 1s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 97% | ETA: 0s
-## Loading documents ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-## 98% | ETA: 0s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 98% | ETA: 0s
-## Loading documents ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-## 99% | ETA: 0s Loading documents
-## ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 100% | ETA: 0s</code></pre>
-<pre class="r"><code># Summary of keyATM_docs
-summary(keyATM_docs)</code></pre>
-<pre><code>## keyATM_docs object of 63982 documents.
-## • Average (min/max) document length: 7.19 (1/22) words
-## 
-## • Number of unique words: 6327</code></pre>
+<div id="data-pre-processing" class="section level2">
+<h2>Data Pre-Processing</h2>
+<pre class="r"><code>data = read.csv(&quot;INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv&quot;)
+library(&#39;stm&#39;)</code></pre>
+<pre><code>## stm v1.3.6 successfully loaded. See ?stm for help. 
+##  Papers, resources, and other materials at structuraltopicmodel.com</code></pre>
+<pre class="r"><code>#pre-processing the titles
+processed_titles &lt;- textProcessor(data$title, metadata = data) </code></pre>
+<pre><code>## Building corpus... 
+## Converting to Lower Case... 
+## Removing punctuation... 
+## Removing stopwords... 
+## Removing numbers... 
+## Stemming... 
+## Creating Output...</code></pre>
+<pre class="r"><code>out_titles &lt;- prepDocuments(processed_titles$documents, processed_titles$vocab, processed_titles$meta)</code></pre>
+<pre><code>## Removing 4217 of 13370 terms (4217 of 461489 tokens) due to frequency 
+## Removing 4 Documents with No Words 
+## Your corpus now has 63994 documents, 9153 terms and 457272 tokens.</code></pre>
+<pre class="r"><code>docs_titles &lt;- out_titles$documents
+vocab_titles &lt;- out_titles$vocab
+meta_titles &lt;- out_titles$meta</code></pre>
 </div>
 
 

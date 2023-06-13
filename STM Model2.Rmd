@@ -1,0 +1,25 @@
+---
+title: "STM Model"
+author: "Charlie J. Gomez, Harshvardhan Singh"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data Pre-Processing
+
+```{r}
+data = read.csv("INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv")
+library('stm')
+
+processed <- textProcessor(data$title, metadata = data) 
+out <- prepDocuments(processed$documents, processed$vocab, processed$meta)
+docs <- out$documents
+vocab <- out$vocab
+meta <- out$meta
+
+
+```
