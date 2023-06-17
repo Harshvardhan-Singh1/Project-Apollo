@@ -1,0 +1,52 @@
+---
+title: "Column Modification - \"Country\""
+author: "Charles J. Gomez, Harshvardhan Singh"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+The country column in our dataset contains a more detailed information about the authors' affiliations, including first, middle, and last authors. However, this brings a level of complexity and potential confusion for machine learning models. Therefore, we propose a method to simplify the country column by retaining only the first and last author affiliations, ensuring a more straightforward representation of authorship.
+```{r}
+library(stringr)
+
+data = read.csv("INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv")
+data_CountryColumn <- data$country
+
+#We removed all instances of middle authors' country codes. This step involved replacing the pattern "\w+\+middle" with an empty string, effectively eliminating all middle author affiliations. The resulting country codes were then trimmed to remove any leading or trailing spaces
+
+data$country <- gsub("\\w+\\+middle", "", data$country)
+data$country <- trimws(data$country)
+print(head(data$country, 50))
+
+#We removed the "+first" and "+last" strings from the remaining country codes using another regular expression substitution. The pattern "\+last|\+first" was replaced with an empty string, ensuring that only the country codes remained
+
+data$country <- gsub("\\+last|\\+first", "", data$country)
+# Remove any extra spaces resulting from the removal
+data$country <- sapply(strsplit(data$country, "\\s+"), function(x) paste(x[x != ""], collapse = " "))
+
+print(head(data$country, 50))
+
+
+
+# Function to calculate the percentage count of each country code in a vector.
+calculate_percentage <- function(vec) {
+  counts <- table(vec)
+  percentages <- prop.table(counts) * 100
+  formatted <- paste0(round(percentages, 1), "%", names(percentages))
+  paste(formatted, collapse = " ")
+}
+
+# Apply the calculate_percentage function to each row in the 'country' column
+data$country <- sapply(strsplit(data$country, "\\s+"), calculate_percentage)
+
+# Print the modified 'country' column (first 20)
+print(head(data$country, 50))
+
+#print first 50 rows of the dataset
+#print(head(data, 50))
+```
