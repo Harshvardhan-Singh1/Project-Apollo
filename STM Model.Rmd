@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r cache=TRUE}
 
 library(stringr)
-#read data
+#Read csv file
 data = read.csv("INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv")
 data_CountryColumn <- data$country
 
@@ -36,34 +36,67 @@ print(head(data$country, 50))
 
 
 
-# Function to calculate the percentage count of each country code in a vector.
-calculate_percentage <- function(vec) {
-  counts <- table(vec)
-  percentages <- prop.table(counts) * 100
-  formatted <- paste0(round(percentages, 1), "%", names(percentages))
-  paste(formatted, collapse = " ")
-}
+# calculate the percentage count of each country code in a vector
+#calculate_percentage <- function(vec) {
+#  counts <- table(vec)
+#  percentages <- prop.table(counts) * 100
+#  formatted <- paste0(round(percentages, 1), "%", names(percentages))
+#  paste(formatted, collapse = " ")
+#}
 
 # Apply the calculate_percentage function to each row in the 'country' column
 #data$country <- sapply(strsplit(data$country, "\\s+"), calculate_percentage)
 
 # Print the modified 'country' column (first 20)
-print(head(data$country, 50))
+#print(head(data$country, 50))
 
 
 
 
-start_column <- which(names(data) == "publication_year")
-end_column <- which(names(data) == "country")
+# Calculate percentage count of each country code in a vector
+calculate_percentage <- function(vec) {
+  counts <- table(vec)
+  percentages <- prop.table(counts) * 100
+  return(percentages)
+}
 
-data_forSampling <- data[, start_column:end_column]
+# Apply the calculate_percentage function to each row in the 'country' column
+percentage_counts <- lapply(strsplit(data$country, "\\s+"), calculate_percentage)
+
+# Get all unique countries
+all_countries <- unique(unlist(lapply(percentage_counts, names)))
+
+# Initialize a new data frame to hold the percentages
+percentage_df <- data.frame(matrix(ncol = length(all_countries), nrow = length(percentage_counts)))
+names(percentage_df) <- all_countries
+
+# Fill the data frame with percentages
+for (i in seq_along(percentage_counts)) {
+  country_names <- names(percentage_counts[[i]])
+  country_percentages <- percentage_counts[[i]]
+  percentage_df[i, country_names] <- country_percentages
+}
+
+# Replace NA values with 0
+percentage_df[is.na(percentage_df)] <- 0
+
+# Combine the original data with the new percentage-encoded country columns
+data <- cbind(data, percentage_df)
+
+str(data)
+
+
+#start_column <- which(names(data) == "publication_year")
+#end_column <- which(names(data) == "country")
+
+#data_forSampling <- data[, start_column:end_column]
 
 
 set.seed(123)  
 #sample_size <- 21000  
 sample_size <- 8000
-sample_rows <- sample(nrow(data_forSampling), sample_size)
-data <- data_forSampling[sample_rows, ]
+sample_rows <- sample(nrow(data), sample_size)
+data <- data[sample_rows, ]
 #data = read.csv("INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv")
 
 library('stm')
@@ -82,16 +115,28 @@ out_titles <- prepDocuments(processed_titles$documents, processed_titles$vocab, 
 
 str(out_titles$meta)
 
+# Create the base formula
+prevalence_formula_str <- "~publication_year"
 
+# Add each country variable to the formula string
+for (i in 8:106) {
+  prevalence_formula_str <- paste(prevalence_formula_str, "+", names(data)[i])
+}
 
+# Convert the string to a formula
+prevalence_formula <- as.formula(prevalence_formula_str)
+print(prevalence_formula)
+
+# Run STM model
 poliblogPrevFit_titles <- stm(documents = out_titles$documents, 
                              vocab = out_titles$vocab, 
-                              K = 20, 
-                              prevalence = ~publication_year + country, 
-                              data = out_titles$meta, 
-                              init.type = "Spectral",
-                              max.em.its = 1000,
-                              gamma.prior = 'L1')
+                             K = 20, 
+                             prevalence = prevalence_formula, 
+                             data = out_titles$meta, 
+                             init.type = "Spectral",
+                             max.em.its = 1000,
+                             gamma.prior = 'L1')
+
 
 #poliblogPrevFit_titles <- stm(documents = out_titles$documents, 
 #                              vocab = out_titles$vocab, 

@@ -9,57 +9,34 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Data Pre-Processing
-
 ```{r}
+library(stringr)
+#Read csv file
 data = read.csv("INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv")
-library('stm')
+data_CountryColumn <- data$country
 
-processed <- textProcessor(data$title, metadata = data) 
-out <- prepDocuments(processed$documents, processed$vocab, processed$meta)
-docs <- out$documents
-vocab <- out$vocab
-meta <- out$meta
+#We removed all instances of middle authors' country codes. This step involved replacing the pattern "\w+\+middle" with an empty string, effectively eliminating all middle author affiliations. The resulting country codes were then trimmed to remove any leading or trailing spaces
 
+data$country <- gsub("\\w+\\+middle", "", data$country)
+data$country <- trimws(data$country)
+print(head(data$country, 50))
 
-```
-## Abstracts Analysis
+#We removed the "+first" and "+last" strings from the remaining country codes using another regular expression substitution. The pattern "\+last|\+first" was replaced with an empty string, ensuring that only the country codes remained
 
-```{r}
+data$country <- gsub("\\+last|\\+first", "", data$country)
+# Remove any extra spaces resulting from the removal
+data$country <- sapply(strsplit(data$country, "\\s+"), function(x) paste(x[x != ""], collapse = " "))
 
-#pre-processing abstracts
-processed_abstracts <- textProcessor(data$paperabstract, metadata = data) 
-out_abstracts <- prepDocuments(processed_abstracts$documents, processed_abstracts$vocab, processed_abstracts$meta)
-docs_abstracts <- out_abstracts$documents
-vocab_abstracts <- out_abstracts$vocab
-meta_abstracts <- out_abstracts$meta
-
-#Prepare data
-plotRemoved(processed_abstracts$documents, lower.thresh = seq(1, 200, by = 100))
-out_abstracts <- prepDocuments(processed_abstracts$documents, processed_abstracts$vocab, processed_abstracts$meta, lower.thresh = 15)
-
-#Estimating the structural topic model
-poliblogPrevFit_abstracts <- stm(documents = out_abstracts$documents, 
-                              vocab = out_abstracts$vocab, 
-                              K = 20, 
-                              prevalence = ~publication_year + country, 
-                              max.em.its = 75, 
-                              data = out_abstracts$meta, 
-                              init.type = "Spectral")
-
-poliblogPrevFit_abstracts
+print(head(data$country, 50))
 
 
-```
-Testing -
-```{r}
-#Read data
-data_original = read.csv("INPUT_SQL_Text_Data_Astronomy_and_Astrophysics.csv")
+str(data)
 
-start_column <- which(names(data_original) == "publication_year")
-end_column <- which(names(data_original) == "country")
 
-data_forSampling <- data_original[, start_column:end_column]
+start_column <- which(names(data) == "publication_year")
+end_column <- which(names(data) == "country")
+
+data_forSampling <- data[, start_column:end_column]
 
 
 set.seed(123)  
@@ -85,33 +62,53 @@ out_titles <- prepDocuments(processed_titles$documents, processed_titles$vocab, 
 
 str(out_titles$meta)
 
-#Estimating the structural topic model
-#poliblogPrevFit_titles <- stm(documents = out_titles$documents, 
-#                              vocab = out_titles$vocab, 
-#                              K = 20, 
-#                              prevalence = ~publication_year + country, 
-#                              max.em.its = 75, 
-#                              data = out_titles$meta, 
-#                              init.type = "Spectral")
+# Create a formula that includes all country dummy variables
+country_vars <- paste(names(data)[4], collapse = " + ")
+prevalence_formula <- as.formula(paste("~ publication_year + ", country_vars))
 
 poliblogPrevFit_titles <- stm(documents = out_titles$documents, 
-                              vocab = out_titles$vocab, 
+                             vocab = out_titles$vocab, 
                               K = 20, 
-                              prevalence = ~publication_year + country, 
+                              prevalence = prevalence_formula, 
                               data = out_titles$meta, 
                               init.type = "Spectral",
                               max.em.its = 1000,
                               gamma.prior = 'L1')
 
+#poliblogPrevFit_titles <- stm(documents = out_titles$documents, 
+#                              vocab = out_titles$vocab, 
+#                              K = 20, 
+#                              prevalence = ~publication_year, 
+#                              data = out_titles$meta, 
+#                              init.type = "Spectral",
+#                              max.em.its = 1000)
 
-poliblogSelect_titles <- selectModel(out_titles$documents, 
+
+poliblogSelect <- selectModel(out_titles$documents, 
                               out_titles$vocab, 
                               K = 20, 
                               prevalence = ~publication_year + country, 
-                              max.em.its = 10, 
+                              max.em.its = 1000, 
                               data = out_titles$meta, 
-                              runs = 2, #20
-                              seed = 159) #8458159
+                              runs = 2, #try 2
+                              seed = 8458159,
+                              gamma.prior = 'L1')
 
+
+
+plotModels(poliblogSelect, pch = c(1, 2, 3, 4), legend.position = "bottomright")
+
+selectedmodel <- poliblogSelect$runout[[1]]
+
+options(stm.em_max_iter = 2000, stm.expect_max_iter = 2000)
+storage <- stm(
+  documents = out_titles$documents,
+  vocab = out_titles$vocab,
+  K = 20,
+  prevalence = ~publication_year + country,
+  data = out_titles$meta,
+  gamma.prior = 0.5
+)
 
 ```
+

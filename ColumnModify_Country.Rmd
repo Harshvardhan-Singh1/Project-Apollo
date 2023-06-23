@@ -85,4 +85,133 @@ summary(data)
 
 # structure of the dataframe
 str(data)
+
+
+#Histogram of total research contributions by country
+
+# Load the necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Combine all countries into one column for the histogram
+all_countries_df <- stack(percentage_df)
+
+# Rename the columns
+colnames(all_countries_df) <- c("Percentage", "Country")
+
+# Remove rows where percentage is zero
+all_countries_df <- all_countries_df[all_countries_df$Percentage > 0,]
+
+# Calculate the total percentage for each country
+all_countries_df <- all_countries_df %>%
+  group_by(Country) %>%
+  summarise(Total = sum(Percentage)) %>%
+  arrange(desc(Total))
+
+# Split the data frame into 5 equal parts
+split_data <- split(all_countries_df, cut(seq(nrow(all_countries_df)), 5, labels = FALSE))
+
+# Create a list to store the plots
+plot_list <- list()
+
+# Define the text size for each plot
+text_size <- c(1.5, 2, 2, 2.5, 2.5)
+
+# Iterate over each subset of data and create a histogram
+plot_list <- lapply(1:5, function(i) {
+  ggplot(split_data[[i]], aes(x=reorder(Country, -Total), y=Total)) +
+    geom_bar(stat="identity", fill="purple") +
+    geom_text(aes(label=sprintf("%.2f", Total)), vjust=-0.5, size=text_size[i]) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x="Country", y="Total Contribution Count", 
+         title = paste("Histogram of Total Research Contributions: Part", i))
+})
+
+# View each plot by calling it from the list
+plot_list[[1]]
+plot_list[[2]]
+plot_list[[3]]
+plot_list[[4]]
+plot_list[[5]]
+
+
+# Histogram of Research Contributions % by Country
+
+# Calculate total of all percentages
+total_percentage <- sum(all_countries_df$Total)
+
+# Express each country's contribution as a percentage of total
+all_countries_df <- all_countries_df %>%
+  mutate(Percentage_of_Total = Total / total_percentage * 100) %>%
+  arrange(desc(Percentage_of_Total))
+
+# Split the data frame into 5 equal parts
+split_data <- split(all_countries_df, cut(seq(nrow(all_countries_df)), 5, labels = FALSE))
+
+# Create a list to store the plots
+plot_list <- list()
+
+# Define the decimal places for each plot
+formats <- c("%.2f%%", "%.2f%%", "%.3f%%", "%.4f%%", "%.4f%%")
+
+# Define the text size for each plot
+text_size <- c(2.5, 2.5, 2, 2, 2)
+
+# Iterate over each subset of data and create a histogram
+plot_list <- lapply(1:5, function(i) {
+  ggplot(split_data[[i]], aes(x=reorder(Country, -Percentage_of_Total), y=Percentage_of_Total)) +
+    geom_bar(stat="identity", fill="orange") +
+    geom_text(aes(label=sprintf(formats[i], Percentage_of_Total)), vjust=-0.5, size=text_size[i]) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x="Country", y="Total Contribution", 
+         title = paste("Histogram of Research Contributions % by Country: Part", i))
+})
+
+# View each plot by calling it from the list
+plot_list[[1]]
+plot_list[[2]]
+plot_list[[3]]
+plot_list[[4]]
+plot_list[[5]]
+
+
+#Histogram by number of articles each country has contributed to
+
+# Combine all countries into one column for the histogram
+all_countries_df <- stack(count_df)
+
+# Rename the columns
+colnames(all_countries_df) <- c("Count", "Country")
+
+# Remove rows where count is zero
+all_countries_df <- all_countries_df[all_countries_df$Count > 0,]
+
+# Calculate the total counts for each country
+all_countries_df <- all_countries_df %>%
+  group_by(Country) %>%
+  summarise(Total = sum(Count)) %>%
+  arrange(desc(Total))
+
+# Split the data frame into 5 equal parts
+split_data <- split(all_countries_df, cut(seq(nrow(all_countries_df)), 5, labels = FALSE))
+
+# Create a list to store the plots
+plot_list <- list()
+
+# Iterate over each subset of data and create a histogram with count
+plot_list <- lapply(1:5, function(i) {
+  ggplot(split_data[[i]], aes(x=reorder(Country, -Total), y=Total)) +
+    geom_bar(stat="identity", fill="steelblue") +
+    geom_text(aes(label=Total), vjust=-0.5, size=2.5) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x="Country", y="Number of Contributions", 
+         title = paste("Histogram of Research Contributions by number of articles: Part", i))
+})
+
+# View each plot by calling it from the list
+plot_list[[1]]
+plot_list[[2]]
+plot_list[[3]]
+plot_list[[4]]
+plot_list[[5]]
 ```
