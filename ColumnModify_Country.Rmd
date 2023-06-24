@@ -150,7 +150,7 @@ plot_list <- lapply(1:5, function(i) {
     geom_text(aes(label=Total), vjust=-0.5, size=2.5) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     labs(x="Country", y="Number of Contributions", 
-         title = paste("Histogram of Research Contributions by Country: Part", i))
+         title = paste("Research Publications by Country: Part", i))
 })
 
 # View each plot by calling it from the list
@@ -195,7 +195,7 @@ plot_list <- lapply(1:5, function(i) {
     geom_text(aes(label=sprintf("%.2f", Total)), vjust=-0.5, size=text_size[i]) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     labs(x="Country", y="Total Contribution Count", 
-         title = paste("Histogram of Total Research Contributions: Part", i))
+         title = paste("Total Research Contributions (total weight): Part", i))
 })
 
 # View each plot by calling it from the list
@@ -235,7 +235,7 @@ plot_list <- lapply(1:5, function(i) {
     geom_text(aes(label=sprintf(formats[i], Percentage_of_Total)), vjust=-0.5, size=text_size[i]) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     labs(x="Country", y="Total Contribution", 
-         title = paste("Histogram of Research Contributions % by Country: Part", i))
+         title = paste("Percentage Distribution of Global Research Contributions: Part", i))
 })
 
 # View each plot by calling it from the list
