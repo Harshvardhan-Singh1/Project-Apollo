@@ -1,5 +1,5 @@
 ---
-title: "Column Modification - \"Country\""
+title: "Preprocessing"
 author: "Charles J. Gomez, Harshvardhan Singh"
 date: "`r Sys.Date()`"
 output: pdf_document
@@ -87,11 +87,82 @@ summary(data)
 str(data)
 
 
-#Histogram of total research contributions by country
-
 # Load the necessary libraries
 library(ggplot2)
 library(dplyr)
+
+#Histogram by number of articles each country has contributed to
+
+# Calculate count of each country code in a vector
+calculate_count <- function(vec) {
+  counts <- table(vec)
+  return(counts)
+}
+
+# Apply the calculate_count function to each row in the 'country' column
+counts <- lapply(strsplit(data$country, "\\s+"), calculate_count)
+
+# Get all unique countries
+all_countries <- unique(unlist(lapply(counts, names)))
+
+# Initialize a new data frame to hold the counts
+count_df <- data.frame(matrix(ncol = length(all_countries), nrow = length(counts)))
+names(count_df) <- all_countries
+
+# Fill the data frame with counts
+for (i in seq_along(counts)) {
+  country_names <- names(counts[[i]])
+  country_counts <- counts[[i]]
+  count_df[i, country_names] <- country_counts
+}
+
+# Replace NA values with 0
+count_df[is.na(count_df)] <- 0
+
+# Combine the original data with the new count-encoded country columns
+data <- cbind(data, count_df)
+
+# Combine all countries into one column for the histogram
+all_countries_df <- stack(count_df)
+
+# Rename the columns
+colnames(all_countries_df) <- c("Count", "Country")
+
+# Remove rows where count is zero
+all_countries_df <- all_countries_df[all_countries_df$Count > 0,]
+
+# Calculate the total counts for each country
+all_countries_df <- all_countries_df %>%
+  group_by(Country) %>%
+  summarise(Total = sum(Count)) %>%
+  arrange(desc(Total))
+
+# Split the data frame into 5 equal parts
+split_data <- split(all_countries_df, cut(seq(nrow(all_countries_df)), 5, labels = FALSE))
+
+# Create a list to store the plots
+plot_list <- list()
+
+# Iterate over each subset of data and create a histogram with count
+plot_list <- lapply(1:5, function(i) {
+  ggplot(split_data[[i]], aes(x=reorder(Country, -Total), y=Total)) +
+    geom_bar(stat="identity", fill="steelblue") +
+    geom_text(aes(label=Total), vjust=-0.5, size=2.5) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x="Country", y="Number of Contributions", 
+         title = paste("Histogram of Research Contributions by Country: Part", i))
+})
+
+# View each plot by calling it from the list
+plot_list[[1]]
+plot_list[[2]]
+plot_list[[3]]
+plot_list[[4]]
+plot_list[[5]]
+
+
+#Histogram of total research contributions by country
+
 
 # Combine all countries into one column for the histogram
 all_countries_df <- stack(percentage_df)
@@ -175,43 +246,6 @@ plot_list[[4]]
 plot_list[[5]]
 
 
-#Histogram by number of articles each country has contributed to
 
-# Combine all countries into one column for the histogram
-all_countries_df <- stack(count_df)
 
-# Rename the columns
-colnames(all_countries_df) <- c("Count", "Country")
-
-# Remove rows where count is zero
-all_countries_df <- all_countries_df[all_countries_df$Count > 0,]
-
-# Calculate the total counts for each country
-all_countries_df <- all_countries_df %>%
-  group_by(Country) %>%
-  summarise(Total = sum(Count)) %>%
-  arrange(desc(Total))
-
-# Split the data frame into 5 equal parts
-split_data <- split(all_countries_df, cut(seq(nrow(all_countries_df)), 5, labels = FALSE))
-
-# Create a list to store the plots
-plot_list <- list()
-
-# Iterate over each subset of data and create a histogram with count
-plot_list <- lapply(1:5, function(i) {
-  ggplot(split_data[[i]], aes(x=reorder(Country, -Total), y=Total)) +
-    geom_bar(stat="identity", fill="steelblue") +
-    geom_text(aes(label=Total), vjust=-0.5, size=2.5) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x="Country", y="Number of Contributions", 
-         title = paste("Histogram of Research Contributions by number of articles: Part", i))
-})
-
-# View each plot by calling it from the list
-plot_list[[1]]
-plot_list[[2]]
-plot_list[[3]]
-plot_list[[4]]
-plot_list[[5]]
 ```
