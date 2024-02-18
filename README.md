@@ -1,23 +1,47 @@
-# Cosmology, Astronomy, and Astrophysics Research Analysis
-This repository contains code and related materials for performing social network and text analysis on research works within the fields of Cosmology, Astronomy, and Astrophysics. Our methodology integrates Natural Language Processing (NLP) and bibliometric techniques.
+# PROJECT Apollo – Text and Network Analysis in Astronomy and Astrophysics
+
+Supervised by Charles J. Gomez, this repository showcases the innovative PROJECT Apollo, aiming to uncover historical trends and collaborative networks within Astronomy and Astrophysics through advanced data analytics.
+
+## Project Description
+PROJECT Apollo is a groundbreaking endeavor that applies Natural Language Processing and Network Analysis to a vast dataset of research works. The project's core objective is to reveal historical patterns, international collaborations, and information exchange through dynamic topic modeling and citation network analysis. With a dataset encompassing over 500,000 research abstracts dating back to 1824, the project employs the Structural Topic Modeling algorithm, extends to manual labeling and classification with weak supervision, and culminates in intricate Network Analysis to map out the scholarly landscape.
+
+### Objectives
+- Identify and analyze the contributions of different countries to the field over time.
+- Decode the usage of astronomical tools such as telescopes and satellites in research.
+- Understand the dynamics of information flow through citation and coauthorship networks.
 
 ## Data Source
-We rely on data from OpenAlex and the Semantic Scholar Academic Graph (S2AG).
+The comprehensive dataset includes:
+- Over 500,000 abstracts from OpenAlex, enriched with metadata for robust analysis.
+- Citation, Coauthorship, and Satellite Data Sharing Networks to map out scholarly interactions.
 
-## Project Objectives
-1. To conduct a comprehensive analysis of research works within Cosmology, Astronomy, and Astrophysics, capturing significant trends and patterns.
-2. To understand the dynamics and influence of international collaborations on research outcomes.
+## Methodology
+- **Topic Modeling:** Utilizing algorithms like STM, DTM, and DIM for thematic analysis.
+- **Text Classification:** Implementing the Snorkel framework for data categorization.
+- **Network Analysis:** Employing 'Networkx' and other Python and R libraries to visualize connections.
 
-## Tools and Techniques
-- Natural Language Processing (NLP): Applied for text analysis of the research works.
-- Bibliometric Techniques: Applied to analyze the research impact based on citation data.
-- Network Analysis: Applied to study the social network of researchers and institutions.
+## Installation
+[DO NOT CLONE WITHOUT PRIOR APPROVAL from the AUTHORS]
+Clone this repository and install dependencies:
+git clone [repository-url]
+pip install -r requirements.txt
 
-## Setup and Installation
-- Clone this repository to your local machine.
-- Install dependencies using `pip install -r requirements.txt`.
-- Add your own API keys in the `config.py` file.
 
-## Files in this repository -
+## Usage
+Update the `config.py` with your API keys and run the scripts to perform the analysis.
 
-## How to Use
+## Data Ethics and Consent
+We prioritize ethical data practices, ensuring transparency, privacy, and fairness in data handling and algorithmic application. All data has been ethically sourced with the appropriate consents and is intended for academic research.
+
+## Team and Acknowledgments
+This project is conducted solely by Harshvardhan Singh under the supervision of Charles J. Gomez. Contributions from other experts in the field will be invited and duly acknowledged.
+
+For a more comprehensive breakdown of the project's methodology and the novelty of the approach, please refer to the detailed project documentation.
+
+## NOTE - The latest files for this research is predominantly stored, shared and managed between the two authors in other platforms (HPC repositories and box folders), the files on gitHub are only to showcase the projects to others. The data files and the SQL queries to retrieve and format the data from OpenAlex database is removed from this repository (to protect our data integrity) and is stored in our personal HPC server repository, and our personal box folder. 
+
+Copyright (c) 2024 Harshvardhan Singh
+
+All Rights Reserved.
+
+No part of this project, PROJECT-Apollo, nor any of its contents or associated code, may be reproduced, copied, modified or adapted, without the prior written consent of the author, unless otherwise indicated for stand-alone materials. The lisence restrictions will change after our research is published.
