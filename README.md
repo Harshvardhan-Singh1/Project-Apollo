@@ -18,6 +18,6 @@ We rely on data from OpenAlex and the Semantic Scholar Academic Graph (S2AG).
 - Install dependencies using `pip install -r requirements.txt`.
 - Add your own API keys in the `config.py` file.
 
-## Files in this repository
+## Files in this repository -
 
 ## How to Use
