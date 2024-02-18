@@ -1,0 +1,1354 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Preprocessing},
+  pdfauthor={Charles J. Gomez, Harshvardhan Singh},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Preprocessing}
+\author{Charles J. Gomez, Harshvardhan Singh}
+\date{2024-02-13}
+
+\begin{document}
+\maketitle
+
+The country column in our dataset contains a more detailed information
+about the authors' affiliations, including first, middle, and last
+authors. However, this brings a level of complexity and potential
+confusion for machine learning models. Therefore, we propose a method to
+simplify the country column by retaining only the first and last author
+affiliations, ensuring a more straightforward representation of
+authorship.
+
+Moreover, we collapse the countries (except the top 15 countries) into
+the following regions - North/South America Europe Asia/Oceania Africa
+
+List of Countries-
+
+\textbf{Top 15 - 91.47\% of global contribution (New Data)} 1. USA (US)
+- 2. China (CN) - 3. Great Britain (GB) - 4. Germany (DE) - 5. Japan
+(JP) - 6. France (FR) 7. Italy (IT) 8.
+
+\textbf{Top 15 - 91.47\% of global contribution (Old Data)} 1. USA (US)
+- 50.61\% 2. Great Britain (GB) - 10.13\% 3. Germany (DE) - 5.73\% 4.
+Italy (IT) - 3.84\% 5. Australia (AU) - 2.82\% 6. Canada (CA) - 2.67\%
+7. Japan (JP) - 2.59\% 8. China (CN) - 2.18\% 9. Netherlands (NL) -
+2.01\% 10. France (FR) - 1.98\% 11. Russia (RU) - 1.85\% 12. Spain (ES)
+- 1.78\% 13. India (IN) - 1.42\% 14. Israel (IL) - 0.96\% 15.
+Switzerland (CH) - 0.90\%
+
+\textbf{The Americas (North/South America)} 1. BR - Brazil 2. CL - Chile
+3. VE - Venezuela 4. MX - Mexico 5. CO - Colombia 6. AR - Argentina 7.
+UY - Uruguay 8. JM - Jamaica 9. CR - Costa Rica 10. GT - Guatemala 11.
+HN - Honduras 12. PR - Puerto Rico 13. VI - U.S. Virgin Islands 14. BO -
+Bolivia 15. PE - Peru 16. EC - Ecuador 17. CU - Cuba
+
+\textbf{Europe} 1. RS - Serbia 2. DK - Denmark 3. SE - Sweden 4. BE -
+Belgium 5. PL - Poland 6. IE - Ireland 7. FI - Finland 8. AT - Austria
+9. HU - Hungary 10. LV - Latvia 11. UA - Ukraine 12. GE - Georgia 13. GR
+- Greece 14. HR - Croatia 15. TR - Turkey 16. AM - Armenia 17. CZ -
+Czech Republic 18. PT - Portugal 19. SK - Slovakia 20. IS - Iceland 21.
+NO - Norway 22. BG - Bulgaria 23. SI - Slovenia 24. EE - Estonia 25. CY
+- Cyprus 26. LU - Luxembourg 27. MT - Malta 28. MK - North Macedonia 29.
+RO - Romania 30. LT - Lithuania
+
+\textbf{Africa} 1. NG - Nigeria 2. MZ - Mozambique 3. BW - Botswana 4.
+ZA - South Africa 5. GH - Ghana 6. RW - Rwanda 7. UG - Uganda 8. EG -
+Egypt 9. TZ - Tanzania 10. MU - Mauritius 11. ZW - Zimbabwe 12. NA -
+Namibia 13. SD - Sudan 14. TN - Tunisia 15. BD - Burundi
+
+\textbf{Asia/Oceania} 1. KR - South Korea 2. TW - Taiwan 3. IR - Iran 4.
+KZ - Kazakhstan 5. KH - Cambodia 6. PK - Pakistan 7. VN - Vietnam 8. MY
+- Malaysia 9. SA - Saudi Arabia 10. UZ - Uzbekistan 11. TH - Thailand
+12. NP - Nepal 13. LK - Sri Lanka 14. ID - Indonesia 15. TJ - Tajikistan
+16. AE - United Arab Emirates 17. LB - Lebanon 18. SG - Singapore 19. AZ
+- Azerbaijan 20. IQ - Iraq 21. OM - Oman 22. KW - Kuwait 23. QA - Qatar
+24. NZ - New Zealand 25. PS - Palestine 26. BD - Bangladesh
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(stringr)}
+
+\NormalTok{data }\OtherTok{=} \FunctionTok{read.csv}\NormalTok{(}\StringTok{"filtered\_data\_feb\_2024.csv"}\NormalTok{)}
+\NormalTok{data\_CountryColumn }\OtherTok{\textless{}{-}}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{country}
+
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{concatenated\_title\_abstract }\OtherTok{\textless{}{-}} \FunctionTok{paste}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{title, data}\SpecialCharTok{$}\NormalTok{paperabstract, }\AttributeTok{sep =} \StringTok{" "}\NormalTok{)}
+
+\CommentTok{\#We removed all instances of middle authors\textquotesingle{} country codes. This step involved replacing the pattern "\textbackslash{}w+\textbackslash{}+middle" with an empty string, effectively eliminating all middle author affiliations. The resulting country codes were then trimmed to remove any leading or trailing spaces}
+
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{country }\OtherTok{\textless{}{-}} \FunctionTok{gsub}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{w+}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{+middle"}\NormalTok{, }\StringTok{""}\NormalTok{, data}\SpecialCharTok{$}\NormalTok{country)}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{country }\OtherTok{\textless{}{-}} \FunctionTok{trimws}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{country)}
+\FunctionTok{print}\NormalTok{(}\FunctionTok{head}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{country, }\DecValTok{50}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] "US+first US+last US+last US+first US+first US+last"                
+##  [2] "RU+first RU+last"                                                  
+##  [3] "CN+first CN+last"                                                  
+##  [4] "US+last US+first"                                                  
+##  [5] "GB+last  US+first"                                                 
+##  [6] "GB+last BE+first"                                                  
+##  [7] "AU+last US+first  AU+last"                                         
+##  [8] "IR+last IR+first"                                                  
+##  [9] "FR+first   FR+last"                                                
+## [10] "US+first FR+last"                                                  
+## [11] "CZ+first   CZ+first         US+last"                               
+## [12] "FR+first"                                                          
+## [13] "CN+first CN+last"                                                  
+## [14] "JP+first JP+last"                                                  
+## [15] "IT+last IT+first"                                                  
+## [16] "IT+last   FR+first FR+first IT+last IT+last  IT+first     IT+first"
+## [17] "CN+first CN+last CN+first  CN+first"                               
+## [18] "US+first US+last"                                                  
+## [19] "PL+last  PL+first"                                                 
+## [20] "CL+first US+first CL+last"                                         
+## [21] "US+first"                                                          
+## [22] "DE+last  DE+first"                                                 
+## [23] "ES+last ES+first"                                                  
+## [24] "US+last    GB+first"                                               
+## [25] "US+last    ES+first US+first"                                      
+## [26] "ES+first ES+last"                                                  
+## [27] "US+first US+last"                                                  
+## [28] "AU+last   AU+first"                                                
+## [29] "IT+first"                                                          
+## [30] "US+last  MX+first      CL+last   US+last ES+first"                 
+## [31] "CH+last"                                                           
+## [32] "US+last US+first"                                                  
+## [33] "IT+last  IT+last    NL+first"                                      
+## [34] "UA+last       PL+first"                                            
+## [35] "RU+first  US+last"                                                 
+## [36] "US+last US+first"                                                  
+## [37] "NZ+first"                                                          
+## [38] "IT+first   IT+last"                                                
+## [39] "JP+first JP+last"                                                  
+## [40] "CA+first"                                                          
+## [41] "IT+last IT+first"                                                  
+## [42] "AU+last US+first"                                                  
+## [43] "PL+first"                                                          
+## [44] "ES+first ES+first ES+last"                                         
+## [45] "FI+last      DE+first"                                             
+## [46] "IT+first IT+last"                                                  
+## [47] "US+last     US+first"                                              
+## [48] "US+last CA+first"                                                  
+## [49] "IN+first  IN+last"                                                 
+## [50] "TW+last   TW+last   TW+first TW+first"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#We removed the "+first" and "+last" strings from the remaining country codes using another regular expression substitution. The pattern "\textbackslash{}+last|\textbackslash{}+first" was replaced with an empty string, ensuring that only the country codes remained}
+
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{country }\OtherTok{\textless{}{-}} \FunctionTok{gsub}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{+last|}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{+first"}\NormalTok{, }\StringTok{""}\NormalTok{, data}\SpecialCharTok{$}\NormalTok{country)}
+\CommentTok{\# Remove any extra spaces resulting from the removal}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{country }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(}\FunctionTok{strsplit}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{country, }\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{s+"}\NormalTok{), }\ControlFlowTok{function}\NormalTok{(x) }\FunctionTok{paste}\NormalTok{(x[x }\SpecialCharTok{!=} \StringTok{""}\NormalTok{], }\AttributeTok{collapse =} \StringTok{" "}\NormalTok{))}
+
+\FunctionTok{print}\NormalTok{(}\FunctionTok{head}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{country, }\DecValTok{50}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] "US US US US US US"    "RU RU"                "CN CN"               
+##  [4] "US US"                "GB US"                "GB BE"               
+##  [7] "AU US AU"             "IR IR"                "FR FR"               
+## [10] "US FR"                "CZ CZ US"             "FR"                  
+## [13] "CN CN"                "JP JP"                "IT IT"               
+## [16] "IT FR FR IT IT IT IT" "CN CN CN CN"          "US US"               
+## [19] "PL PL"                "CL US CL"             "US"                  
+## [22] "DE DE"                "ES ES"                "US GB"               
+## [25] "US ES US"             "ES ES"                "US US"               
+## [28] "AU AU"                "IT"                   "US MX CL US ES"      
+## [31] "CH"                   "US US"                "IT IT NL"            
+## [34] "UA PL"                "RU US"                "US US"               
+## [37] "NZ"                   "IT IT"                "JP JP"               
+## [40] "CA"                   "IT IT"                "AU US"               
+## [43] "PL"                   "ES ES ES"             "FI DE"               
+## [46] "IT IT"                "US US"                "US CA"               
+## [49] "IN IN"                "TW TW TW TW"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# calculate the percentage count of each country code in a vector}
+\CommentTok{\#calculate\_percentage \textless{}{-} function(vec) \{}
+\CommentTok{\#  counts \textless{}{-} table(vec)}
+\CommentTok{\#  percentages \textless{}{-} prop.table(counts) * 100}
+\CommentTok{\#  formatted \textless{}{-} paste0(round(percentages, 1), "\%", names(percentages))}
+\CommentTok{\#  paste(formatted, collapse = " ")}
+\CommentTok{\#\}}
+
+\CommentTok{\# Apply the calculate\_percentage function to each row in the \textquotesingle{}country\textquotesingle{} column}
+\CommentTok{\#data$country \textless{}{-} sapply(strsplit(data$country, "\textbackslash{}\textbackslash{}s+"), calculate\_percentage)}
+
+\CommentTok{\# Print the modified \textquotesingle{}country\textquotesingle{} column (first 20)}
+\CommentTok{\#print(head(data$country, 50))}
+
+
+
+
+\CommentTok{\# Calculate percentage count of each country code in a vector}
+\NormalTok{calculate\_percentage }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(vec) \{}
+\NormalTok{  counts }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(vec)}
+\NormalTok{  percentages }\OtherTok{\textless{}{-}} \FunctionTok{prop.table}\NormalTok{(counts) }\SpecialCharTok{*} \DecValTok{100}
+\NormalTok{  formatted\_percentages }\OtherTok{\textless{}{-}} \FunctionTok{round}\NormalTok{(percentages, }\DecValTok{2}\NormalTok{)}
+  \FunctionTok{return}\NormalTok{(percentages)}
+\NormalTok{\}}
+
+\CommentTok{\# Apply the calculate\_percentage function to each row in the \textquotesingle{}country\textquotesingle{} column}
+\NormalTok{percentage\_counts }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\FunctionTok{strsplit}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{country, }\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{s+"}\NormalTok{), calculate\_percentage)}
+
+\CommentTok{\# Get all unique countries}
+\NormalTok{all\_countries }\OtherTok{\textless{}{-}} \FunctionTok{unique}\NormalTok{(}\FunctionTok{unlist}\NormalTok{(}\FunctionTok{lapply}\NormalTok{(percentage\_counts, names)))}
+
+\CommentTok{\# Initialize a new data frame to hold the percentages}
+\NormalTok{percentage\_df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{matrix}\NormalTok{(}\AttributeTok{ncol =} \FunctionTok{length}\NormalTok{(all\_countries), }\AttributeTok{nrow =} \FunctionTok{length}\NormalTok{(percentage\_counts)))}
+\FunctionTok{names}\NormalTok{(percentage\_df) }\OtherTok{\textless{}{-}}\NormalTok{ all\_countries}
+
+\CommentTok{\# Fill the data frame with percentages}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \FunctionTok{seq\_along}\NormalTok{(percentage\_counts)) \{}
+\NormalTok{  country\_names }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(percentage\_counts[[i]])}
+\NormalTok{  country\_percentages }\OtherTok{\textless{}{-}}\NormalTok{ percentage\_counts[[i]]}
+\NormalTok{  percentage\_df[i, country\_names] }\OtherTok{\textless{}{-}}\NormalTok{ country\_percentages}
+\NormalTok{\}}
+
+\CommentTok{\# Replace NA values with 0}
+\NormalTok{percentage\_df[}\FunctionTok{is.na}\NormalTok{(percentage\_df)] }\OtherTok{\textless{}{-}} \DecValTok{0}
+
+\CommentTok{\# Combine the original data with the new percentage{-}encoded country columns}
+\NormalTok{data }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(data, percentage\_df)}
+
+\CommentTok{\# Summary of dataframe}
+\FunctionTok{summary}\NormalTok{(data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   concept_id          work_id               year         title          
+##  Length:416912      Length:416912      Min.   :1672   Length:416912     
+##  Class :character   Class :character   1st Qu.:2002   Class :character  
+##  Mode  :character   Mode  :character   Median :2013   Mode  :character  
+##                                        Mean   :2009                     
+##                                        3rd Qu.:2019                     
+##                                        Max.   :2024                     
+##    abstract           country          year_concept      
+##  Length:416912      Length:416912      Length:416912     
+##  Class :character   Class :character   Class :character  
+##  Mode  :character   Mode  :character   Mode  :character  
+##                                                          
+##                                                          
+##                                                          
+##  concatenated_title_abstract       US               RU         
+##  Length:416912               Min.   :  0.00   Min.   :  0.000  
+##  Class :character            1st Qu.:  0.00   1st Qu.:  0.000  
+##  Mode  :character            Median :  0.00   Median :  0.000  
+##                              Mean   : 31.38   Mean   :  2.769  
+##                              3rd Qu.:100.00   3rd Qu.:  0.000  
+##                              Max.   :100.00   Max.   :100.000  
+##        CN                GB                BE                 AU         
+##  Min.   :  0.000   Min.   :  0.000   Min.   :  0.0000   Min.   :  0.000  
+##  1st Qu.:  0.000   1st Qu.:  0.000   1st Qu.:  0.0000   1st Qu.:  0.000  
+##  Median :  0.000   Median :  0.000   Median :  0.0000   Median :  0.000  
+##  Mean   :  8.966   Mean   :  6.918   Mean   :  0.6835   Mean   :  2.157  
+##  3rd Qu.:  0.000   3rd Qu.:  0.000   3rd Qu.:  0.0000   3rd Qu.:  0.000  
+##  Max.   :100.000   Max.   :100.000   Max.   :100.0000   Max.   :100.000  
+##        IR                FR                CZ                 JP         
+##  Min.   :  0.000   Min.   :  0.000   Min.   :  0.0000   Min.   :  0.000  
+##  1st Qu.:  0.000   1st Qu.:  0.000   1st Qu.:  0.0000   1st Qu.:  0.000  
+##  Median :  0.000   Median :  0.000   Median :  0.0000   Median :  0.000  
+##  Mean   :  0.415   Mean   :  4.215   Mean   :  0.4757   Mean   :  4.557  
+##  3rd Qu.:  0.000   3rd Qu.:  0.000   3rd Qu.:  0.0000   3rd Qu.:  0.000  
+##  Max.   :100.000   Max.   :100.000   Max.   :100.0000   Max.   :100.000  
+##        IT                PL                CL                 DE         
+##  Min.   :  0.000   Min.   :  0.000   Min.   :  0.0000   Min.   :  0.000  
+##  1st Qu.:  0.000   1st Qu.:  0.000   1st Qu.:  0.0000   1st Qu.:  0.000  
+##  Median :  0.000   Median :  0.000   Median :  0.0000   Median :  0.000  
+##  Mean   :  3.941   Mean   :  1.169   Mean   :  0.6816   Mean   :  6.069  
+##  3rd Qu.:  0.000   3rd Qu.:  0.000   3rd Qu.:  0.0000   3rd Qu.:  0.000  
+##  Max.   :100.000   Max.   :100.000   Max.   :100.0000   Max.   :100.000  
+##        ES                MX                 CH                NL         
+##  Min.   :  0.000   Min.   :  0.0000   Min.   :  0.000   Min.   :  0.000  
+##  1st Qu.:  0.000   1st Qu.:  0.0000   1st Qu.:  0.000   1st Qu.:  0.000  
+##  Median :  0.000   Median :  0.0000   Median :  0.000   Median :  0.000  
+##  Mean   :  2.272   Mean   :  0.6153   Mean   :  1.077   Mean   :  1.758  
+##  3rd Qu.:  0.000   3rd Qu.:  0.0000   3rd Qu.:  0.000   3rd Qu.:  0.000  
+##  Max.   :100.000   Max.   :100.0000   Max.   :100.000   Max.   :100.000  
+##        UA                 NZ                 CA                FI          
+##  Min.   :  0.0000   Min.   :  0.0000   Min.   :  0.000   Min.   :  0.0000  
+##  1st Qu.:  0.0000   1st Qu.:  0.0000   1st Qu.:  0.000   1st Qu.:  0.0000  
+##  Median :  0.0000   Median :  0.0000   Median :  0.000   Median :  0.0000  
+##  Mean   :  0.4593   Mean   :  0.2519   Mean   :  2.685   Mean   :  0.4397  
+##  3rd Qu.:  0.0000   3rd Qu.:  0.0000   3rd Qu.:  0.000   3rd Qu.:  0.0000  
+##  Max.   :100.0000   Max.   :100.0000   Max.   :100.000   Max.   :100.0000  
+##        IN                TW                 SA                 TH         
+##  Min.   :  0.000   Min.   :  0.0000   Min.   :  0.0000   Min.   :  0.000  
+##  1st Qu.:  0.000   1st Qu.:  0.0000   1st Qu.:  0.0000   1st Qu.:  0.000  
+##  Median :  0.000   Median :  0.0000   Median :  0.0000   Median :  0.000  
+##  Mean   :  2.309   Mean   :  0.6849   Mean   :  0.1358   Mean   :  0.137  
+##  3rd Qu.:  0.000   3rd Qu.:  0.0000   3rd Qu.:  0.0000   3rd Qu.:  0.000  
+##  Max.   :100.000   Max.   :100.0000   Max.   :100.0000   Max.   :100.000  
+##        EG                 RS                 ZA                DK        
+##  Min.   :  0.0000   Min.   :  0.0000   Min.   :  0.000   Min.   :  0.00  
+##  1st Qu.:  0.0000   1st Qu.:  0.0000   1st Qu.:  0.000   1st Qu.:  0.00  
+##  Median :  0.0000   Median :  0.0000   Median :  0.000   Median :  0.00  
+##  Mean   :  0.2475   Mean   :  0.1387   Mean   :  0.438   Mean   :  0.47  
+##  3rd Qu.:  0.0000   3rd Qu.:  0.0000   3rd Qu.:  0.000   3rd Qu.:  0.00  
+##  Max.   :100.0000   Max.   :100.0000   Max.   :100.000   Max.   :100.00  
+##        KR                TJ                  BR                HK           
+##  Min.   :  0.000   Min.   :  0.00000   Min.   :  0.000   Min.   :  0.00000  
+##  1st Qu.:  0.000   1st Qu.:  0.00000   1st Qu.:  0.000   1st Qu.:  0.00000  
+##  Median :  0.000   Median :  0.00000   Median :  0.000   Median :  0.00000  
+##  Mean   :  1.171   Mean   :  0.01298   Mean   :  1.086   Mean   :  0.09097  
+##  3rd Qu.:  0.000   3rd Qu.:  0.00000   3rd Qu.:  0.000   3rd Qu.:  0.00000  
+##  Max.   :100.000   Max.   :100.00000   Max.   :100.000   Max.   :100.00000  
+##        SE                 PT                 LT                  SG          
+##  Min.   :  0.0000   Min.   :  0.0000   Min.   :  0.00000   Min.   :  0.0000  
+##  1st Qu.:  0.0000   1st Qu.:  0.0000   1st Qu.:  0.00000   1st Qu.:  0.0000  
+##  Median :  0.0000   Median :  0.0000   Median :  0.00000   Median :  0.0000  
+##  Mean   :  0.9324   Mean   :  0.3096   Mean   :  0.07919   Mean   :  0.2004  
+##  3rd Qu.:  0.0000   3rd Qu.:  0.0000   3rd Qu.:  0.00000   3rd Qu.:  0.0000  
+##  Max.   :100.0000   Max.   :100.0000   Max.   :100.00000   Max.   :100.0000  
+##        AZ                  LV                  GR                 ID          
+##  Min.   :  0.00000   Min.   :  0.00000   Min.   :  0.0000   Min.   :  0.0000  
+##  1st Qu.:  0.00000   1st Qu.:  0.00000   1st Qu.:  0.0000   1st Qu.:  0.0000  
+##  Median :  0.00000   Median :  0.00000   Median :  0.0000   Median :  0.0000  
+##  Mean   :  0.02166   Mean   :  0.04241   Mean   :  0.4362   Mean   :  0.6339  
+##  3rd Qu.:  0.00000   3rd Qu.:  0.00000   3rd Qu.:  0.0000   3rd Qu.:  0.0000  
+##  Max.   :100.00000   Max.   :100.00000   Max.   :100.0000   Max.   :100.0000  
+##        AE                  TR                 PK                 AR          
+##  Min.   :  0.00000   Min.   :  0.0000   Min.   :  0.0000   Min.   :  0.0000  
+##  1st Qu.:  0.00000   1st Qu.:  0.0000   1st Qu.:  0.0000   1st Qu.:  0.0000  
+##  Median :  0.00000   Median :  0.0000   Median :  0.0000   Median :  0.0000  
+##  Mean   :  0.04878   Mean   :  0.4786   Mean   :  0.1605   Mean   :  0.4063  
+##  3rd Qu.:  0.00000   3rd Qu.:  0.0000   3rd Qu.:  0.0000   3rd Qu.:  0.0000  
+##  Max.   :100.00000   Max.   :100.0000   Max.   :100.0000   Max.   :100.0000  
+##        HU                 IL                 BG                 NO          
+##  Min.   :  0.0000   Min.   :  0.0000   Min.   :  0.0000   Min.   :  0.0000  
+##  1st Qu.:  0.0000   1st Qu.:  0.0000   1st Qu.:  0.0000   1st Qu.:  0.0000  
+##  Median :  0.0000   Median :  0.0000   Median :  0.0000   Median :  0.0000  
+##  Mean   :  0.3185   Mean   :  0.7028   Mean   :  0.1329   Mean   :  0.4741  
+##  3rd Qu.:  0.0000   3rd Qu.:  0.0000   3rd Qu.:  0.0000   3rd Qu.:  0.0000  
+##  Max.   :100.0000   Max.   :100.0000   Max.   :100.0000   Max.   :100.0000  
+##        NG                  AT                 BO                 BY           
+##  Min.   :  0.00000   Min.   :  0.0000   Min.   :0.00e+00   Min.   :  0.00000  
+##  1st Qu.:  0.00000   1st Qu.:  0.0000   1st Qu.:0.00e+00   1st Qu.:  0.00000  
+##  Median :  0.00000   Median :  0.0000   Median :0.00e+00   Median :  0.00000  
+##  Mean   :  0.09737   Mean   :  0.4252   Mean   :3.84e-03   Mean   :  0.05364  
+##  3rd Qu.:  0.00000   3rd Qu.:  0.0000   3rd Qu.:0.00e+00   3rd Qu.:  0.00000  
+##  Max.   :100.00000   Max.   :100.0000   Max.   :1.00e+02   Max.   :100.00000  
+##        EE                  IS                  IE                 PR           
+##  Min.   :  0.00000   Min.   :  0.00000   Min.   :  0.0000   Min.   :  0.00000  
+##  1st Qu.:  0.00000   1st Qu.:  0.00000   1st Qu.:  0.0000   1st Qu.:  0.00000  
+##  Median :  0.00000   Median :  0.00000   Median :  0.0000   Median :  0.00000  
+##  Mean   :  0.07765   Mean   :  0.02512   Mean   :  0.2397   Mean   :  0.02379  
+##  3rd Qu.:  0.00000   3rd Qu.:  0.00000   3rd Qu.:  0.0000   3rd Qu.:  0.00000  
+##  Max.   :100.00000   Max.   :100.00000   Max.   :100.0000   Max.   :100.00000  
+##        SI                  SK                 KE                  GP         
+##  Min.   :  0.00000   Min.   :  0.0000   Min.   :  0.00000   Min.   :0.0e+00  
+##  1st Qu.:  0.00000   1st Qu.:  0.0000   1st Qu.:  0.00000   1st Qu.:0.0e+00  
+##  Median :  0.00000   Median :  0.0000   Median :  0.00000   Median :0.0e+00  
+##  Mean   :  0.08745   Mean   :  0.1398   Mean   :  0.01487   Mean   :3.2e-04  
+##  3rd Qu.:  0.00000   3rd Qu.:  0.0000   3rd Qu.:  0.00000   3rd Qu.:0.0e+00  
+##  Max.   :100.00000   Max.   :100.0000   Max.   :100.00000   Max.   :1.0e+02  
+##        BZ                VN                  LB                  AM           
+##  Min.   :0.0e+00   Min.   :  0.00000   Min.   :  0.00000   Min.   :  0.00000  
+##  1st Qu.:0.0e+00   1st Qu.:  0.00000   1st Qu.:  0.00000   1st Qu.:  0.00000  
+##  Median :0.0e+00   Median :  0.00000   Median :  0.00000   Median :  0.00000  
+##  Mean   :1.2e-04   Mean   :  0.07448   Mean   :  0.02794   Mean   :  0.06101  
+##  3rd Qu.:0.0e+00   3rd Qu.:  0.00000   3rd Qu.:  0.00000   3rd Qu.:  0.00000  
+##  Max.   :2.5e+01   Max.   :100.00000   Max.   :100.00000   Max.   :100.00000  
+##        RO                 NP                  MM                 IQ           
+##  Min.   :  0.0000   Min.   :  0.00000   Min.   :0.00e+00   Min.   :  0.00000  
+##  1st Qu.:  0.0000   1st Qu.:  0.00000   1st Qu.:0.00e+00   1st Qu.:  0.00000  
+##  Median :  0.0000   Median :  0.00000   Median :0.00e+00   Median :  0.00000  
+##  Mean   :  0.1673   Mean   :  0.02712   Mean   :2.06e-03   Mean   :  0.09468  
+##  3rd Qu.:  0.0000   3rd Qu.:  0.00000   3rd Qu.:0.00e+00   3rd Qu.:  0.00000  
+##  Max.   :100.0000   Max.   :100.00000   Max.   :1.00e+02   Max.   :100.00000  
+##        RW                 GE                  EC                  KZ           
+##  Min.   :0.00e+00   Min.   :  0.00000   Min.   :  0.00000   Min.   :  0.00000  
+##  1st Qu.:0.00e+00   1st Qu.:  0.00000   1st Qu.:  0.00000   1st Qu.:  0.00000  
+##  Median :0.00e+00   Median :  0.00000   Median :  0.00000   Median :  0.00000  
+##  Mean   :1.83e-03   Mean   :  0.03688   Mean   :  0.01728   Mean   :  0.05285  
+##  3rd Qu.:0.00e+00   3rd Qu.:  0.00000   3rd Qu.:  0.00000   3rd Qu.:  0.00000  
+##  Max.   :1.00e+02   Max.   :100.00000   Max.   :100.00000   Max.   :100.00000  
+##        MA                  BD                  HR           
+##  Min.   :  0.00000   Min.   :  0.00000   Min.   :  0.00000  
+##  1st Qu.:  0.00000   1st Qu.:  0.00000   1st Qu.:  0.00000  
+##  Median :  0.00000   Median :  0.00000   Median :  0.00000  
+##  Mean   :  0.03345   Mean   :  0.04525   Mean   :  0.08213  
+##  3rd Qu.:  0.00000   3rd Qu.:  0.00000   3rd Qu.:  0.00000  
+##  Max.   :100.00000   Max.   :100.00000   Max.   :100.00000  
+##        UY                  CO                  CU           
+##  Min.   :  0.00000   Min.   :  0.00000   Min.   :  0.00000  
+##  1st Qu.:  0.00000   1st Qu.:  0.00000   1st Qu.:  0.00000  
+##  Median :  0.00000   Median :  0.00000   Median :  0.00000  
+##  Mean   :  0.01183   Mean   :  0.09649   Mean   :  0.01793  
+##  3rd Qu.:  0.00000   3rd Qu.:  0.00000   3rd Qu.:  0.00000  
+##  Max.   :100.00000   Max.   :100.00000   Max.   :100.00000  
+##        DZ                  LY                 MY                 TN           
+##  Min.   :  0.00000   Min.   :0.00e+00   Min.   :  0.0000   Min.   :  0.00000  
+##  1st Qu.:  0.00000   1st Qu.:0.00e+00   1st Qu.:  0.0000   1st Qu.:  0.00000  
+##  Median :  0.00000   Median :0.00e+00   Median :  0.0000   Median :  0.00000  
+##  Mean   :  0.05342   Mean   :2.76e-03   Mean   :  0.1524   Mean   :  0.04968  
+##  3rd Qu.:  0.00000   3rd Qu.:0.00e+00   3rd Qu.:  0.0000   3rd Qu.:  0.00000  
+##  Max.   :100.00000   Max.   :1.00e+02   Max.   :100.0000   Max.   :100.00000  
+##        LK                 MK                  AL                 VA          
+##  Min.   :  0.0000   Min.   :  0.00000   Min.   :0.00e+00   Min.   :0.00e+00  
+##  1st Qu.:  0.0000   1st Qu.:  0.00000   1st Qu.:0.00e+00   1st Qu.:0.00e+00  
+##  Median :  0.0000   Median :  0.00000   Median :0.00e+00   Median :0.00e+00  
+##  Mean   :  0.0125   Mean   :  0.01048   Mean   :4.56e-03   Mean   :3.86e-03  
+##  3rd Qu.:  0.0000   3rd Qu.:  0.00000   3rd Qu.:0.00e+00   3rd Qu.:0.00e+00  
+##  Max.   :100.0000   Max.   :100.00000   Max.   :1.00e+02   Max.   :1.00e+02  
+##        GH                  BA                 UZ                  VE           
+##  Min.   :  0.00000   Min.   :0.00e+00   Min.   :  0.00000   Min.   :  0.00000  
+##  1st Qu.:  0.00000   1st Qu.:0.00e+00   1st Qu.:  0.00000   1st Qu.:  0.00000  
+##  Median :  0.00000   Median :0.00e+00   Median :  0.00000   Median :  0.00000  
+##  Mean   :  0.01852   Mean   :9.29e-03   Mean   :  0.04285   Mean   :  0.02696  
+##  3rd Qu.:  0.00000   3rd Qu.:0.00e+00   3rd Qu.:  0.00000   3rd Qu.:  0.00000  
+##  Max.   :100.00000   Max.   :1.00e+02   Max.   :100.00000   Max.   :100.00000  
+##        MO                 CM                 MN                 FJ          
+##  Min.   :0.00e+00   Min.   :0.00e+00   Min.   :0.00e+00   Min.   :0.00e+00  
+##  1st Qu.:0.00e+00   1st Qu.:0.00e+00   1st Qu.:0.00e+00   1st Qu.:0.00e+00  
+##  Median :0.00e+00   Median :0.00e+00   Median :0.00e+00   Median :0.00e+00  
+##  Mean   :7.91e-03   Mean   :9.01e-03   Mean   :5.22e-03   Mean   :3.16e-03  
+##  3rd Qu.:0.00e+00   3rd Qu.:0.00e+00   3rd Qu.:0.00e+00   3rd Qu.:0.00e+00  
+##  Max.   :1.00e+02   Max.   :1.00e+02   Max.   :1.00e+02   Max.   :1.00e+02  
+##        OM                  ET                  MG                QA           
+##  Min.   :  0.00000   Min.   :  0.00000   Min.   :0.0e+00   Min.   :  0.00000  
+##  1st Qu.:  0.00000   1st Qu.:  0.00000   1st Qu.:0.0e+00   1st Qu.:  0.00000  
+##  Median :  0.00000   Median :  0.00000   Median :0.0e+00   Median :  0.00000  
+##  Mean   :  0.01025   Mean   :  0.02021   Mean   :9.3e-04   Mean   :  0.02087  
+##  3rd Qu.:  0.00000   3rd Qu.:  0.00000   3rd Qu.:0.0e+00   3rd Qu.:  0.00000  
+##  Max.   :100.00000   Max.   :100.00000   Max.   :1.0e+02   Max.   :100.00000  
+##        MZ                 CG                CY                  PE           
+##  Min.   :0.00e+00   Min.   :0.0e+00   Min.   :  0.00000   Min.   :  0.00000  
+##  1st Qu.:0.00e+00   1st Qu.:0.0e+00   1st Qu.:  0.00000   1st Qu.:  0.00000  
+##  Median :0.00e+00   Median :0.0e+00   Median :  0.00000   Median :  0.00000  
+##  Mean   :2.87e-03   Mean   :7.5e-04   Mean   :  0.02516   Mean   :  0.02457  
+##  3rd Qu.:0.00e+00   3rd Qu.:0.0e+00   3rd Qu.:  0.00000   3rd Qu.:  0.00000  
+##  Max.   :1.00e+02   Max.   :1.0e+02   Max.   :100.00000   Max.   :100.00000  
+##        SD                 ZW                 BW                 KW          
+##  Min.   :0.00e+00   Min.   :0.00e+00   Min.   :0.00e+00   Min.   :  0.0000  
+##  1st Qu.:0.00e+00   1st Qu.:0.00e+00   1st Qu.:0.00e+00   1st Qu.:  0.0000  
+##  Median :0.00e+00   Median :0.00e+00   Median :0.00e+00   Median :  0.0000  
+##  Mean   :4.69e-03   Mean   :5.18e-03   Mean   :4.92e-03   Mean   :  0.0152  
+##  3rd Qu.:0.00e+00   3rd Qu.:0.00e+00   3rd Qu.:0.00e+00   3rd Qu.:  0.0000  
+##  Max.   :1.00e+02   Max.   :1.00e+02   Max.   :1.00e+02   Max.   :100.0000  
+##        JO                MT                  PF                KG          
+##  Min.   :  0.000   Min.   :  0.00000   Min.   :0.0e+00   Min.   :0.00e+00  
+##  1st Qu.:  0.000   1st Qu.:  0.00000   1st Qu.:0.0e+00   1st Qu.:0.00e+00  
+##  Median :  0.000   Median :  0.00000   Median :0.0e+00   Median :0.00e+00  
+##  Mean   :  0.032   Mean   :  0.01282   Mean   :1.6e-03   Mean   :5.35e-03  
+##  3rd Qu.:  0.000   3rd Qu.:  0.00000   3rd Qu.:0.0e+00   3rd Qu.:0.00e+00  
+##  Max.   :100.000   Max.   :100.00000   Max.   :1.0e+02   Max.   :1.00e+02  
+##        BF                 LU                  NI                KH         
+##  Min.   :0.00e+00   Min.   :  0.00000   Min.   :0.0e+00   Min.   :0.0e+00  
+##  1st Qu.:0.00e+00   1st Qu.:  0.00000   1st Qu.:0.0e+00   1st Qu.:0.0e+00  
+##  Median :0.00e+00   Median :  0.00000   Median :0.0e+00   Median :0.0e+00  
+##  Mean   :3.08e-03   Mean   :  0.01355   Mean   :9.4e-04   Mean   :3.4e-03  
+##  3rd Qu.:0.00e+00   3rd Qu.:  0.00000   3rd Qu.:0.0e+00   3rd Qu.:0.0e+00  
+##  Max.   :1.00e+02   Max.   :100.00000   Max.   :1.0e+02   Max.   :1.0e+02  
+##        CR                  SV                UG                 ME          
+##  Min.   :  0.00000   Min.   :0.0e+00   Min.   :0.00e+00   Min.   :0.00e+00  
+##  1st Qu.:  0.00000   1st Qu.:0.0e+00   1st Qu.:0.00e+00   1st Qu.:0.00e+00  
+##  Median :  0.00000   Median :0.0e+00   Median :0.00e+00   Median :0.00e+00  
+##  Mean   :  0.01672   Mean   :8.5e-04   Mean   :8.31e-03   Mean   :3.72e-03  
+##  3rd Qu.:  0.00000   3rd Qu.:0.0e+00   3rd Qu.:0.00e+00   3rd Qu.:0.00e+00  
+##  Max.   :100.00000   Max.   :1.0e+02   Max.   :1.00e+02   Max.   :1.00e+02  
+##        ZM                 TZ                PH                  MD       
+##  Min.   :0.00e+00   Min.   :0.0e+00   Min.   :  0.00000   Min.   :0e+00  
+##  1st Qu.:0.00e+00   1st Qu.:0.0e+00   1st Qu.:  0.00000   1st Qu.:0e+00  
+##  Median :0.00e+00   Median :0.0e+00   Median :  0.00000   Median :0e+00  
+##  Mean   :3.14e-03   Mean   :7.6e-03   Mean   :  0.02788   Mean   :8e-03  
+##  3rd Qu.:0.00e+00   3rd Qu.:0.0e+00   3rd Qu.:  0.00000   3rd Qu.:0e+00  
+##  Max.   :1.00e+02   Max.   :1.0e+02   Max.   :100.00000   Max.   :1e+02  
+##        PA                 BN                SY                 PG         
+##  Min.   :0.00e+00   Min.   :0.0e+00   Min.   :0.00e+00   Min.   :0.0e+00  
+##  1st Qu.:0.00e+00   1st Qu.:0.0e+00   1st Qu.:0.00e+00   1st Qu.:0.0e+00  
+##  Median :0.00e+00   Median :0.0e+00   Median :0.00e+00   Median :0.0e+00  
+##  Mean   :4.79e-03   Mean   :3.6e-03   Mean   :3.69e-03   Mean   :9.6e-04  
+##  3rd Qu.:0.00e+00   3rd Qu.:0.0e+00   3rd Qu.:0.00e+00   3rd Qu.:0.0e+00  
+##  Max.   :1.00e+02   Max.   :1.0e+02   Max.   :1.00e+02   Max.   :1.0e+02  
+##        GT                 PS                 HN                 BH         
+##  Min.   :0.00e+00   Min.   :0.00e+00   Min.   :0.00e+00   Min.   :0.0e+00  
+##  1st Qu.:0.00e+00   1st Qu.:0.00e+00   1st Qu.:0.00e+00   1st Qu.:0.0e+00  
+##  Median :0.00e+00   Median :0.00e+00   Median :0.00e+00   Median :0.0e+00  
+##  Mean   :3.15e-03   Mean   :2.11e-03   Mean   :2.54e-03   Mean   :2.9e-03  
+##  3rd Qu.:0.00e+00   3rd Qu.:0.00e+00   3rd Qu.:0.00e+00   3rd Qu.:0.0e+00  
+##  Max.   :1.00e+02   Max.   :1.00e+02   Max.   :1.00e+02   Max.   :1.0e+02  
+##        CD                 LI                YE                 NC         
+##  Min.   :0.00e+00   Min.   :0.0e+00   Min.   :0.00e+00   Min.   :0.0e+00  
+##  1st Qu.:0.00e+00   1st Qu.:0.0e+00   1st Qu.:0.00e+00   1st Qu.:0.0e+00  
+##  Median :0.00e+00   Median :0.0e+00   Median :0.00e+00   Median :0.0e+00  
+##  Mean   :2.25e-03   Mean   :4.2e-04   Mean   :4.49e-03   Mean   :4.9e-04  
+##  3rd Qu.:0.00e+00   3rd Qu.:0.0e+00   3rd Qu.:0.00e+00   3rd Qu.:0.0e+00  
+##  Max.   :1.00e+02   Max.   :1.0e+02   Max.   :1.00e+02   Max.   :5.0e+01  
+##        NE                 MC                GA                JM          
+##  Min.   :0.00e+00   Min.   :0.0e+00   Min.   :0.0e+00   Min.   :0.00e+00  
+##  1st Qu.:0.00e+00   1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.:0.00e+00  
+##  Median :0.00e+00   Median :0.0e+00   Median :0.0e+00   Median :0.00e+00  
+##  Mean   :1.64e-03   Mean   :9.6e-04   Mean   :3.9e-04   Mean   :2.84e-03  
+##  3rd Qu.:0.00e+00   3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.:0.00e+00  
+##  Max.   :1.00e+02   Max.   :1.0e+02   Max.   :1.0e+02   Max.   :1.00e+02  
+##        CI                 BJ                 ST              NA          
+##  Min.   :0.00e+00   Min.   :0.00e+00   Min.   :0e+00   Min.   :0.00e+00  
+##  1st Qu.:0.00e+00   1st Qu.:0.00e+00   1st Qu.:0e+00   1st Qu.:0.00e+00  
+##  Median :0.00e+00   Median :0.00e+00   Median :0e+00   Median :0.00e+00  
+##  Mean   :2.28e-03   Mean   :4.58e-03   Mean   :3e-04   Mean   :2.56e-03  
+##  3rd Qu.:0.00e+00   3rd Qu.:0.00e+00   3rd Qu.:0e+00   3rd Qu.:0.00e+00  
+##  Max.   :1.00e+02   Max.   :1.00e+02   Max.   :5e+01   Max.   :1.00e+02  
+##        BB                GD              SN                 BI          
+##  Min.   :0.0e+00   Min.   :0e+00   Min.   :0.00e+00   Min.   :0.00e+00  
+##  1st Qu.:0.0e+00   1st Qu.:0e+00   1st Qu.:0.00e+00   1st Qu.:0.00e+00  
+##  Median :0.0e+00   Median :0e+00   Median :0.00e+00   Median :0.00e+00  
+##  Mean   :8.5e-04   Mean   :3e-04   Mean   :1.25e-03   Mean   :2.02e-03  
+##  3rd Qu.:0.0e+00   3rd Qu.:0e+00   3rd Qu.:0.00e+00   3rd Qu.:0.00e+00  
+##  Max.   :1.0e+02   Max.   :1e+02   Max.   :1.00e+02   Max.   :1.00e+02  
+##        MW                 SS                 MU                 SZ         
+##  Min.   :0.00e+00   Min.   :0.00e+00   Min.   :0.00e+00   Min.   :0.0e+00  
+##  1st Qu.:0.00e+00   1st Qu.:0.00e+00   1st Qu.:0.00e+00   1st Qu.:0.0e+00  
+##  Median :0.00e+00   Median :0.00e+00   Median :0.00e+00   Median :0.0e+00  
+##  Mean   :2.28e-03   Mean   :5.28e-03   Mean   :1.08e-03   Mean   :7.2e-04  
+##  3rd Qu.:0.00e+00   3rd Qu.:0.00e+00   3rd Qu.:0.00e+00   3rd Qu.:0.0e+00  
+##  Max.   :1.00e+02   Max.   :1.00e+02   Max.   :1.00e+02   Max.   :1.0e+02  
+##        GL                 TT                 VG                 BS          
+##  Min.   :0.00e+00   Min.   :0.00e+00   Min.   :0.00e+00   Min.   :0.00e+00  
+##  1st Qu.:0.00e+00   1st Qu.:0.00e+00   1st Qu.:0.00e+00   1st Qu.:0.00e+00  
+##  Median :0.00e+00   Median :0.00e+00   Median :0.00e+00   Median :0.00e+00  
+##  Mean   :1.39e-03   Mean   :3.27e-03   Mean   :5.48e-03   Mean   :1.66e-03  
+##  3rd Qu.:0.00e+00   3rd Qu.:0.00e+00   3rd Qu.:0.00e+00   3rd Qu.:0.00e+00  
+##  Max.   :1.00e+02   Max.   :1.00e+02   Max.   :1.00e+02   Max.   :1.00e+02  
+##        DO                 XK                GM              CF          
+##  Min.   :0.00e+00   Min.   :0.0e+00   Min.   :0e+00   Min.   : 0.00000  
+##  1st Qu.:0.00e+00   1st Qu.:0.0e+00   1st Qu.:0e+00   1st Qu.: 0.00000  
+##  Median :0.00e+00   Median :0.0e+00   Median :0e+00   Median : 0.00000  
+##  Mean   :1.65e-03   Mean   :2.7e-03   Mean   :4e-04   Mean   : 0.00008  
+##  3rd Qu.:0.00e+00   3rd Qu.:0.0e+00   3rd Qu.:0e+00   3rd Qu.: 0.00000  
+##  Max.   :1.00e+02   Max.   :1.0e+02   Max.   :1e+02   Max.   :33.33333  
+##        PY                MS              BT                 GU         
+##  Min.   :0.0e+00   Min.   :0e+00   Min.   :0.00e+00   Min.   :0.0e+00  
+##  1st Qu.:0.0e+00   1st Qu.:0e+00   1st Qu.:0.00e+00   1st Qu.:0.0e+00  
+##  Median :0.0e+00   Median :0e+00   Median :0.00e+00   Median :0.0e+00  
+##  Mean   :6.8e-04   Mean   :2e-04   Mean   :1.44e-03   Mean   :2.4e-04  
+##  3rd Qu.:0.0e+00   3rd Qu.:0e+00   3rd Qu.:0.00e+00   3rd Qu.:0.0e+00  
+##  Max.   :1.0e+02   Max.   :5e+01   Max.   :1.00e+02   Max.   :1.0e+02  
+##        SJ                TG                HT                 RE         
+##  Min.   :0.0e+00   Min.   :0.0e+00   Min.   : 0.00000   Min.   :0.0e+00  
+##  1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.: 0.00000   1st Qu.:0.0e+00  
+##  Median :0.0e+00   Median :0.0e+00   Median : 0.00000   Median :0.0e+00  
+##  Mean   :1.2e-04   Mean   :7.6e-04   Mean   : 0.00008   Mean   :5.6e-04  
+##  3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.: 0.00000   3rd Qu.:0.0e+00  
+##  Max.   :5.0e+01   Max.   :1.0e+02   Max.   :33.33333   Max.   :1.0e+02  
+##        AX                AF                SC                VU       
+##  Min.   :0.0e+00   Min.   :0.0e+00   Min.   :0.0e+00   Min.   :0e+00  
+##  1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.:0e+00  
+##  Median :0.0e+00   Median :0.0e+00   Median :0.0e+00   Median :0e+00  
+##  Mean   :2.4e-04   Mean   :1.2e-03   Mean   :4.8e-05   Mean   :2e-04  
+##  3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.:0e+00  
+##  Max.   :1.0e+02   Max.   :1.0e+02   Max.   :2.0e+01   Max.   :5e+01  
+##        KP                MV                LA                FO         
+##  Min.   :0.0e+00   Min.   :0.0e+00   Min.   :0.0e+00   Min.   :0.0e+00  
+##  1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.:0.0e+00  
+##  Median :0.0e+00   Median :0.0e+00   Median :0.0e+00   Median :0.0e+00  
+##  Mean   :9.2e-04   Mean   :4.4e-04   Mean   :2.4e-04   Mean   :2.9e-04  
+##  3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.:0.0e+00  
+##  Max.   :1.0e+02   Max.   :1.0e+02   Max.   :1.0e+02   Max.   :1.0e+02  
+##        MR                SX                AO                LS         
+##  Min.   :0.0e+00   Min.   :0.0e+00   Min.   :0.0e+00   Min.   :0.0e+00  
+##  1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.:0.0e+00  
+##  Median :0.0e+00   Median :0.0e+00   Median :0.0e+00   Median :0.0e+00  
+##  Mean   :1.2e-04   Mean   :2.4e-04   Mean   :2.4e-04   Mean   :5.4e-04  
+##  3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.:0.0e+00  
+##  Max.   :5.0e+01   Max.   :1.0e+02   Max.   :1.0e+02   Max.   :1.0e+02  
+##        WS                ML                TM                LR         
+##  Min.   :0.0e+00   Min.   :0.0e+00   Min.   :0.0e+00   Min.   :0.0e+00  
+##  1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.:0.0e+00  
+##  Median :0.0e+00   Median :0.0e+00   Median :0.0e+00   Median :0.0e+00  
+##  Mean   :2.4e-04   Mean   :1.2e-04   Mean   :2.4e-04   Mean   :2.4e-04  
+##  3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.:0.0e+00  
+##  Max.   :1.0e+02   Max.   :5.0e+01   Max.   :1.0e+02   Max.   :1.0e+02  
+##        TC              PW                TO                GI         
+##  Min.   :0e+00   Min.   :0.0e+00   Min.   :0.0e+00   Min.   :0.0e+00  
+##  1st Qu.:0e+00   1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.:0.0e+00  
+##  Median :0e+00   Median :0.0e+00   Median :0.0e+00   Median :0.0e+00  
+##  Mean   :3e-04   Mean   :1.2e-04   Mean   :1.2e-04   Mean   :2.4e-04  
+##  3rd Qu.:0e+00   3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.:0.0e+00  
+##  Max.   :1e+02   Max.   :5.0e+01   Max.   :5.0e+01   Max.   :1.0e+02  
+##        GF                DM                JE                BM       
+##  Min.   :0.0e+00   Min.   :0.0e+00   Min.   :0.0e+00   Min.   :0e+00  
+##  1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.:0e+00  
+##  Median :0.0e+00   Median :0.0e+00   Median :0.0e+00   Median :0e+00  
+##  Mean   :2.4e-04   Mean   :1.2e-04   Mean   :4.8e-04   Mean   :2e-04  
+##  3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.:0e+00  
+##  Max.   :1.0e+02   Max.   :5.0e+01   Max.   :1.0e+02   Max.   :5e+01  
+##        KN                FK                SL                AG          
+##  Min.   :0.0e+00   Min.   :0.0e+00   Min.   :0.0e+00   Min.   : 0.00000  
+##  1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.:0.0e+00   1st Qu.: 0.00000  
+##  Median :0.0e+00   Median :0.0e+00   Median :0.0e+00   Median : 0.00000  
+##  Mean   :2.4e-04   Mean   :2.4e-04   Mean   :2.4e-04   Mean   : 0.00014  
+##  3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.:0.0e+00   3rd Qu.: 0.00000  
+##  Max.   :1.0e+02   Max.   :1.0e+02   Max.   :1.0e+02   Max.   :33.33333  
+##        GW                  TD         
+##  Min.   : 0.000000   Min.   :0.0e+00  
+##  1st Qu.: 0.000000   1st Qu.:0.0e+00  
+##  Median : 0.000000   Median :0.0e+00  
+##  Mean   : 0.000069   Mean   :2.4e-04  
+##  3rd Qu.: 0.000000   3rd Qu.:0.0e+00  
+##  Max.   :28.571429   Max.   :1.0e+02
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# structure of the dataframe}
+\FunctionTok{str}\NormalTok{(data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    416912 obs. of  206 variables:
+##  $ concept_id                 : chr  "https://openalex.org/C1276947" "https://openalex.org/C1276947" "https://openalex.org/C1276947" "https://openalex.org/C1276947" ...
+##  $ work_id                    : chr  "https://openalex.org/W3099939590" "https://openalex.org/W4200534233" "https://openalex.org/W2923048970" "https://openalex.org/W2118435332" ...
+##  $ year                       : int  2002 2021 2019 1992 2020 2023 2022 2021 2023 1990 ...
+##  $ title                      : chr  "On the Optimization of Broadband Photometry for Galaxy Evolution Studies" "A search for variability of hard X-ray emission from the Vela pulsar wind nebula" "Non-intrusive Load Monitoring Based on Convolutional Neural Network Mixed Residual Unit" "Submillimeter astronomy (heterodyne spectroscopy)" ...
+##  $ abstract                   : chr  "We have derived the uncertainties to be expected in the derivation of galaxy physical properties (star formatio"| __truncated__ "Observations of hard X-ray emission from the Vela pulsar wind nebula (PWN) with the ISGRI camera aboard INTEGRA"| __truncated__ "Non-intrusive Load Monitoring(NILM) is designed to determine the type of electrical appliance after decomposing"| __truncated__ "Some of the aspects of submillimeter-wave astronomy which are relevant to the field of heterodyne spectroscopy "| __truncated__ ...
+##  $ country                    : chr  "US US US US US US" "RU RU" "CN CN" "US US" ...
+##  $ year_concept               : chr  "2002+https://openalex.org/C1276947" "2021+https://openalex.org/C1276947" "2019+https://openalex.org/C1276947" "1992+https://openalex.org/C1276947" ...
+##  $ concatenated_title_abstract: chr  "On the Optimization of Broadband Photometry for Galaxy Evolution Studies " "A search for variability of hard X-ray emission from the Vela pulsar wind nebula " "Non-intrusive Load Monitoring Based on Convolutional Neural Network Mixed Residual Unit " "Submillimeter astronomy (heterodyne spectroscopy) " ...
+##  $ US                         : num  100 0 0 100 50 ...
+##  $ RU                         : num  0 100 0 0 0 0 0 0 0 0 ...
+##  $ CN                         : num  0 0 100 0 0 0 0 0 0 0 ...
+##  $ GB                         : num  0 0 0 0 50 50 0 0 0 0 ...
+##  $ BE                         : num  0 0 0 0 0 50 0 0 0 0 ...
+##  $ AU                         : num  0 0 0 0 0 ...
+##  $ IR                         : num  0 0 0 0 0 0 0 100 0 0 ...
+##  $ FR                         : num  0 0 0 0 0 0 0 0 100 50 ...
+##  $ CZ                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ JP                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ IT                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ PL                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ CL                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ DE                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ ES                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ MX                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ CH                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ NL                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ UA                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ NZ                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ CA                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ FI                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ IN                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ TW                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ SA                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ TH                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ EG                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ RS                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ ZA                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ DK                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ KR                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ TJ                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ BR                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ HK                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ SE                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ PT                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ LT                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ SG                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ AZ                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ LV                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ GR                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ ID                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ AE                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ TR                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ PK                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ AR                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ HU                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ IL                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ BG                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ NO                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ NG                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ AT                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ BO                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ BY                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ EE                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ IS                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ IE                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ PR                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ SI                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ SK                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ KE                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ GP                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ BZ                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ VN                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ LB                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ AM                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ RO                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ NP                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ MM                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ IQ                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ RW                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ GE                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ EC                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ KZ                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ MA                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ BD                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ HR                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ UY                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ CO                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ CU                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ DZ                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ LY                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ MY                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ TN                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ LK                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ MK                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ AL                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ VA                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ GH                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ BA                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ UZ                         : num  0 0 0 0 0 0 0 0 0 0 ...
+##   [list output truncated]
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Load the necessary libraries}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'dplyr'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Histogram by number of articles each country has contributed to}
+
+\CommentTok{\# Calculate count of each country code in a vector}
+\NormalTok{calculate\_count }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(vec) \{}
+\NormalTok{  counts }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(vec)}
+  \FunctionTok{return}\NormalTok{(counts)}
+\NormalTok{\}}
+
+\CommentTok{\# Apply the calculate\_count function to each row in the \textquotesingle{}country\textquotesingle{} column}
+\NormalTok{counts }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\FunctionTok{strsplit}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{country, }\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{s+"}\NormalTok{), calculate\_count)}
+
+\CommentTok{\# Get all unique countries}
+\NormalTok{all\_countries }\OtherTok{\textless{}{-}} \FunctionTok{unique}\NormalTok{(}\FunctionTok{unlist}\NormalTok{(}\FunctionTok{lapply}\NormalTok{(counts, names)))}
+
+\CommentTok{\# Initialize a new data frame to hold the counts}
+\NormalTok{count\_df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\FunctionTok{matrix}\NormalTok{(}\AttributeTok{ncol =} \FunctionTok{length}\NormalTok{(all\_countries), }\AttributeTok{nrow =} \FunctionTok{length}\NormalTok{(counts)))}
+\FunctionTok{names}\NormalTok{(count\_df) }\OtherTok{\textless{}{-}}\NormalTok{ all\_countries}
+
+\CommentTok{\# Fill the data frame with counts}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \FunctionTok{seq\_along}\NormalTok{(counts)) \{}
+\NormalTok{  country\_names }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(counts[[i]])}
+\NormalTok{  country\_counts }\OtherTok{\textless{}{-}}\NormalTok{ counts[[i]]}
+\NormalTok{  count\_df[i, country\_names] }\OtherTok{\textless{}{-}}\NormalTok{ country\_counts}
+\NormalTok{\}}
+
+\CommentTok{\# Replace NA values with 0}
+\NormalTok{count\_df[}\FunctionTok{is.na}\NormalTok{(count\_df)] }\OtherTok{\textless{}{-}} \DecValTok{0}
+
+\CommentTok{\# Combine all countries into one column for the histogram}
+\NormalTok{all\_countries\_df }\OtherTok{\textless{}{-}} \FunctionTok{stack}\NormalTok{(count\_df)}
+
+\CommentTok{\# Rename the columns}
+\FunctionTok{colnames}\NormalTok{(all\_countries\_df) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Count"}\NormalTok{, }\StringTok{"Country"}\NormalTok{)}
+
+\CommentTok{\# Remove rows where count is zero}
+\NormalTok{all\_countries\_df }\OtherTok{\textless{}{-}}\NormalTok{ all\_countries\_df[all\_countries\_df}\SpecialCharTok{$}\NormalTok{Count }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{,]}
+
+\CommentTok{\# Calculate the total counts for each country}
+\NormalTok{all\_countries\_df }\OtherTok{\textless{}{-}}\NormalTok{ all\_countries\_df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Country) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{Total =} \FunctionTok{sum}\NormalTok{(Count)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(Total))}
+
+\CommentTok{\# Split the data frame into 5 equal parts}
+\NormalTok{split\_data }\OtherTok{\textless{}{-}} \FunctionTok{split}\NormalTok{(all\_countries\_df, }\FunctionTok{cut}\NormalTok{(}\FunctionTok{seq}\NormalTok{(}\FunctionTok{nrow}\NormalTok{(all\_countries\_df)), }\DecValTok{5}\NormalTok{, }\AttributeTok{labels =} \ConstantTok{FALSE}\NormalTok{))}
+
+\CommentTok{\# Create a list to store the plots}
+\NormalTok{plot\_list }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{()}
+
+\CommentTok{\# Iterate over each subset of data and create a histogram with count}
+\NormalTok{plot\_list }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(i) \{}
+  \FunctionTok{ggplot}\NormalTok{(split\_data[[i]], }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\FunctionTok{reorder}\NormalTok{(Country, }\SpecialCharTok{{-}}\NormalTok{Total), }\AttributeTok{y=}\NormalTok{Total)) }\SpecialCharTok{+}
+    \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat=}\StringTok{"identity"}\NormalTok{, }\AttributeTok{fill=}\StringTok{"steelblue"}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{geom\_text}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label=}\NormalTok{Total), }\AttributeTok{vjust=}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{, }\AttributeTok{size=}\FloatTok{2.5}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{)) }\SpecialCharTok{+}
+    \FunctionTok{labs}\NormalTok{(}\AttributeTok{x=}\StringTok{"Country"}\NormalTok{, }\AttributeTok{y=}\StringTok{"Number of Contributions"}\NormalTok{, }
+         \AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Research Publications by Country: Part"}\NormalTok{, i))}
+\NormalTok{\})}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# View each plot by calling it from the list}
+\NormalTok{plot\_list[[}\DecValTok{1}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot\_list[[}\DecValTok{2}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-3-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot\_list[[}\DecValTok{3}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-3-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot\_list[[}\DecValTok{4}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-3-4.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot\_list[[}\DecValTok{5}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-3-5.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Histogram of total research contributions by country}
+
+
+\CommentTok{\# Combine all countries into one column for the histogram}
+\NormalTok{all\_countries\_df }\OtherTok{\textless{}{-}} \FunctionTok{stack}\NormalTok{(percentage\_df)}
+
+\CommentTok{\# Rename the columns}
+\FunctionTok{colnames}\NormalTok{(all\_countries\_df) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Percentage"}\NormalTok{, }\StringTok{"Country"}\NormalTok{)}
+
+\CommentTok{\# Remove rows where percentage is zero}
+\NormalTok{all\_countries\_df }\OtherTok{\textless{}{-}}\NormalTok{ all\_countries\_df[all\_countries\_df}\SpecialCharTok{$}\NormalTok{Percentage }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{,]}
+
+\CommentTok{\# Calculate the total percentage for each country}
+\NormalTok{all\_countries\_df }\OtherTok{\textless{}{-}}\NormalTok{ all\_countries\_df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Country) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{Total =} \FunctionTok{sum}\NormalTok{(Percentage)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(Total))}
+
+\CommentTok{\# Split the data frame into 5 equal parts}
+\NormalTok{split\_data }\OtherTok{\textless{}{-}} \FunctionTok{split}\NormalTok{(all\_countries\_df, }\FunctionTok{cut}\NormalTok{(}\FunctionTok{seq}\NormalTok{(}\FunctionTok{nrow}\NormalTok{(all\_countries\_df)), }\DecValTok{5}\NormalTok{, }\AttributeTok{labels =} \ConstantTok{FALSE}\NormalTok{))}
+
+\CommentTok{\# Create a list to store the plots}
+\NormalTok{plot\_list }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{()}
+
+\CommentTok{\# Define the text size for each plot}
+\NormalTok{text\_size }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{2}\NormalTok{, }\FloatTok{2.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{)}
+
+\CommentTok{\# Iterate over each subset of data and create a histogram}
+\NormalTok{plot\_list }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(i) \{}
+  \FunctionTok{ggplot}\NormalTok{(split\_data[[i]], }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\FunctionTok{reorder}\NormalTok{(Country, }\SpecialCharTok{{-}}\NormalTok{Total), }\AttributeTok{y=}\NormalTok{Total)) }\SpecialCharTok{+}
+    \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat=}\StringTok{"identity"}\NormalTok{, }\AttributeTok{fill=}\StringTok{"purple"}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{geom\_text}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label=}\FunctionTok{sprintf}\NormalTok{(}\StringTok{"\%.2f"}\NormalTok{, Total)), }\AttributeTok{vjust=}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{, }\AttributeTok{size=}\NormalTok{text\_size[i]) }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{)) }\SpecialCharTok{+}
+    \FunctionTok{labs}\NormalTok{(}\AttributeTok{x=}\StringTok{"Country"}\NormalTok{, }\AttributeTok{y=}\StringTok{"Total Contribution Count"}\NormalTok{, }
+         \AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Total Research Contributions (total weight): Part"}\NormalTok{, i))}
+\NormalTok{\})}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# View each plot by calling it from the list}
+\NormalTok{plot\_list[[}\DecValTok{1}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot\_list[[}\DecValTok{2}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-5-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot\_list[[}\DecValTok{3}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-5-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot\_list[[}\DecValTok{4}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-5-4.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot\_list[[}\DecValTok{5}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-5-5.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Histogram of Research Contributions \% by Country}
+
+\CommentTok{\# Calculate total of all percentages}
+\NormalTok{total\_percentage }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(all\_countries\_df}\SpecialCharTok{$}\NormalTok{Total)}
+
+\CommentTok{\# Express each country\textquotesingle{}s contribution as a percentage of total}
+\NormalTok{all\_countries\_df }\OtherTok{\textless{}{-}}\NormalTok{ all\_countries\_df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Percentage\_of\_Total =}\NormalTok{ Total }\SpecialCharTok{/}\NormalTok{ total\_percentage }\SpecialCharTok{*} \DecValTok{100}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(Percentage\_of\_Total))}
+
+\CommentTok{\# Split the data frame into 5 equal parts}
+\NormalTok{split\_data }\OtherTok{\textless{}{-}} \FunctionTok{split}\NormalTok{(all\_countries\_df, }\FunctionTok{cut}\NormalTok{(}\FunctionTok{seq}\NormalTok{(}\FunctionTok{nrow}\NormalTok{(all\_countries\_df)), }\DecValTok{5}\NormalTok{, }\AttributeTok{labels =} \ConstantTok{FALSE}\NormalTok{))}
+
+\CommentTok{\# Create a list to store the plots}
+\NormalTok{plot\_list }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{()}
+
+\CommentTok{\# Define the decimal places for each plot}
+\NormalTok{formats }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"\%.2f\%\%"}\NormalTok{, }\StringTok{"\%.2f\%\%"}\NormalTok{, }\StringTok{"\%.3f\%\%"}\NormalTok{, }\StringTok{"\%.4f\%\%"}\NormalTok{, }\StringTok{"\%.4f\%\%"}\NormalTok{)}
+
+\CommentTok{\# Define the text size for each plot}
+\NormalTok{text\_size }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FloatTok{2.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{2}\NormalTok{)}
+
+\CommentTok{\# Iterate over each subset of data and create a histogram}
+\NormalTok{plot\_list }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(i) \{}
+  \FunctionTok{ggplot}\NormalTok{(split\_data[[i]], }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\FunctionTok{reorder}\NormalTok{(Country, }\SpecialCharTok{{-}}\NormalTok{Percentage\_of\_Total), }\AttributeTok{y=}\NormalTok{Percentage\_of\_Total)) }\SpecialCharTok{+}
+    \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat=}\StringTok{"identity"}\NormalTok{, }\AttributeTok{fill=}\StringTok{"orange"}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{geom\_text}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label=}\FunctionTok{sprintf}\NormalTok{(formats[i], Percentage\_of\_Total)), }\AttributeTok{vjust=}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{, }\AttributeTok{size=}\NormalTok{text\_size[i]) }\SpecialCharTok{+}
+    \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{)) }\SpecialCharTok{+}
+    \FunctionTok{labs}\NormalTok{(}\AttributeTok{x=}\StringTok{"Country"}\NormalTok{, }\AttributeTok{y=}\StringTok{"Total Contribution"}\NormalTok{, }
+         \AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Percentage Distribution of Global Research Contributions: Part"}\NormalTok{, i))}
+\NormalTok{\})}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# View each plot by calling it from the list}
+\NormalTok{plot\_list[[}\DecValTok{1}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot\_list[[}\DecValTok{2}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-7-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot\_list[[}\DecValTok{3}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-7-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot\_list[[}\DecValTok{4}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-7-4.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot\_list[[}\DecValTok{5}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-7-5.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# List the country codes for each region}
+
+\NormalTok{north\_america }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}MX\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}PR\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}CU\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}DO\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}GT\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}HN\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}CR\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}PA\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}NI\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SV\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BZ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}JM\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}TT\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BS\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}VG\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}GD\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BB\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}KN\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}AG\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}DM\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}GP\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}GF\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MS\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}FK\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}HT\textquotesingle{}}\NormalTok{)}
+
+\NormalTok{south\_america }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}BR\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}AR\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}CL\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}CO\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}VE\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}PE\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}EC\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}UY\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}PY\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BO\textquotesingle{}}\NormalTok{)}
+
+
+\NormalTok{europe }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}PL\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}RO\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}NL\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BE\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}GR\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}CZ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}PT\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SE\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}HU\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BY\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}AT\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}CH\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}DK\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}FI\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SK\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}NO\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}IE\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}HR\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SI\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}LV\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}LT\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}EE\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}IS\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MT\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}LU\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MC\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}VA\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}RS\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}ME\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MK\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}AL\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BA\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}XK\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}UA\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MD\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BG\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}CY\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}TR\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}GE\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}AM\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}AZ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}LI\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SJ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}JE\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}AX\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}FO\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}GI\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BM\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}TC\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SX\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}GL\textquotesingle{}}\NormalTok{)}
+
+
+
+\NormalTok{africa }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}DZ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}AO\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}EG\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}LY\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MA\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SD\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}TN\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}ET\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}KE\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}TZ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}UG\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}DZ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}NG\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}GH\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}CI\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SN\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}ML\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}CD\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}ZW\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}RW\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}ZM\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MG\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MW\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}AO\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}CM\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BF\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}NE\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MU\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MZ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}LS\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BW\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}GM\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}TD\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}CG\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}NA\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SS\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SZ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BJ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}LR\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SL\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}GW\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}TG\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}CF\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}CI\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}GA\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}ST\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SC\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MR\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BI\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}RE\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}ZA\textquotesingle{}}\NormalTok{)}
+
+
+
+\NormalTok{asia }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}KR\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}ID\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}TH\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}PK\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MY\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}PH\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}VN\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}LK\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BD\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}NP\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MM\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}TW\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}HK\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SG\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MN\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}KH\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}LA\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BT\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MO\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BN\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}MV\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}KW\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}AF\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}AE\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SY\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}TJ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}KZ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}KG\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}IL\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}PS\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}LB\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}KP\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}BH\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}IQ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}YE\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}JO\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}IR\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}QA\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}OM\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}UZ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}TM\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}SA\textquotesingle{}}\NormalTok{)}
+
+
+\NormalTok{oceania }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}NZ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}PG\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}FJ\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}VU\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}NC\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}PF\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}GU\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}WS\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}TO\textquotesingle{}}\NormalTok{,}\StringTok{\textquotesingle{}PW\textquotesingle{}}\NormalTok{)}
+
+
+\CommentTok{\# Create the regional sum columns}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{NorthAmerica }\OtherTok{\textless{}{-}} \FunctionTok{rowSums}\NormalTok{(data[,north\_america], }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{SouthAmerica }\OtherTok{\textless{}{-}} \FunctionTok{rowSums}\NormalTok{(data[,south\_america], }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{Europe }\OtherTok{\textless{}{-}} \FunctionTok{rowSums}\NormalTok{(data[,europe], }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{Africa }\OtherTok{\textless{}{-}} \FunctionTok{rowSums}\NormalTok{(data[,africa], }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{Asia }\OtherTok{\textless{}{-}} \FunctionTok{rowSums}\NormalTok{(data[,asia], }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{Oceania }\OtherTok{\textless{}{-}} \FunctionTok{rowSums}\NormalTok{(data[,oceania], }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+
+\CommentTok{\# drop the original country columns}
+\NormalTok{country\_cols }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(north\_america, south\_america, europe, africa, asia, oceania)}
+\NormalTok{data }\OtherTok{\textless{}{-}}\NormalTok{ data[, }\SpecialCharTok{!}\NormalTok{(}\FunctionTok{names}\NormalTok{(data) }\SpecialCharTok{\%in\%}\NormalTok{ country\_cols)]}
+
+
+
+\CommentTok{\# Select the columns of interest}
+\NormalTok{selected\_countries }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{\textquotesingle{}US\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}IN\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}DE\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}GB\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}CN\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}FR\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}IT\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}RU\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}CA\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}AU\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}JP\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}ES\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}NorthAmerica\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}SouthAmerica\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}Europe\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}Africa\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}Asia\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}Oceania\textquotesingle{}}\NormalTok{)}
+\NormalTok{selected\_data }\OtherTok{\textless{}{-}}\NormalTok{ data[selected\_countries]}
+
+\CommentTok{\# Histogram by number of contributions each country or region has contributed to}
+\NormalTok{all\_countries\_df }\OtherTok{\textless{}{-}} \FunctionTok{stack}\NormalTok{(selected\_data)}
+\FunctionTok{colnames}\NormalTok{(all\_countries\_df) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Count"}\NormalTok{, }\StringTok{"Country"}\NormalTok{)}
+\NormalTok{all\_countries\_df }\OtherTok{\textless{}{-}}\NormalTok{ all\_countries\_df[all\_countries\_df}\SpecialCharTok{$}\NormalTok{Count }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{,]}
+
+\CommentTok{\# Calculate the total counts for each country}
+\NormalTok{all\_countries\_df }\OtherTok{\textless{}{-}}\NormalTok{ all\_countries\_df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Country) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{Total =} \FunctionTok{sum}\NormalTok{(Count)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(Total))}
+
+\CommentTok{\# Histogram of total research contributions by country}
+\NormalTok{all\_countries\_df }\OtherTok{\textless{}{-}} \FunctionTok{stack}\NormalTok{(selected\_data)}
+\FunctionTok{colnames}\NormalTok{(all\_countries\_df) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Count"}\NormalTok{, }\StringTok{"Country"}\NormalTok{)}
+\NormalTok{all\_countries\_df }\OtherTok{\textless{}{-}}\NormalTok{ all\_countries\_df[all\_countries\_df}\SpecialCharTok{$}\NormalTok{Count }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{,]}
+
+\NormalTok{all\_countries\_df }\OtherTok{\textless{}{-}}\NormalTok{ all\_countries\_df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Country) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{Total =} \FunctionTok{sum}\NormalTok{(Count)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(Total))}
+
+\CommentTok{\# Histogram of Research Contributions \% by Country}
+\NormalTok{total\_percentage }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(all\_countries\_df}\SpecialCharTok{$}\NormalTok{Total)}
+\NormalTok{all\_countries\_df }\OtherTok{\textless{}{-}}\NormalTok{ all\_countries\_df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Percentage\_of\_Total =}\NormalTok{ Total }\SpecialCharTok{/}\NormalTok{ total\_percentage }\SpecialCharTok{*} \DecValTok{100}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(Percentage\_of\_Total))}
+
+\CommentTok{\# Create the plot}
+\FunctionTok{ggplot}\NormalTok{(all\_countries\_df, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\FunctionTok{reorder}\NormalTok{(Country, }\SpecialCharTok{{-}}\NormalTok{Percentage\_of\_Total), }\AttributeTok{y=}\NormalTok{Percentage\_of\_Total)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat=}\StringTok{"identity"}\NormalTok{, }\AttributeTok{fill=}\StringTok{"red"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_text}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{label=}\FunctionTok{sprintf}\NormalTok{(}\StringTok{"\%.2f\%\%"}\NormalTok{, Percentage\_of\_Total)), }\AttributeTok{vjust=}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{, }\AttributeTok{size=}\FloatTok{2.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x=}\StringTok{"Country/Region"}\NormalTok{, }\AttributeTok{y=}\StringTok{"Percentage of Total Contributions"}\NormalTok{, }
+       \AttributeTok{title =} \StringTok{"Percentage Distribution of Global Research Contributions"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Find the smallest (earliest) year}
+\NormalTok{earliest\_year }\OtherTok{\textless{}{-}} \FunctionTok{min}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{year, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\FunctionTok{print}\NormalTok{(}\FunctionTok{paste}\NormalTok{(}\StringTok{"The earliest publication year is:"}\NormalTok{, earliest\_year))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "The earliest publication year is: 1672"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Find the greatest (latest) year}
+\NormalTok{latest\_year }\OtherTok{\textless{}{-}} \FunctionTok{max}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{year, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\FunctionTok{print}\NormalTok{(}\FunctionTok{paste}\NormalTok{(}\StringTok{"The latest publication year is:"}\NormalTok{, latest\_year))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "The latest publication year is: 2024"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Create table for the count of publications in each year}
+\FunctionTok{table}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{year)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  1672  1676  1687  1697  1728  1790  1798  1802  1803  1807  1824  1825  1826 
+##     1     1     1     1     1     1     1     1     1     1     1     1     1 
+##  1833  1835  1848  1856  1860  1861  1863  1864  1865  1867  1868  1869  1870 
+##     1     1     1     1     1     1     4     2     3     1     1     2     3 
+##  1871  1872  1875  1877  1878  1879  1880  1881  1882  1883  1886  1887  1888 
+##     2     4     2     3     6     9     2     1     1     7     2     1     1 
+##  1889  1890  1892  1894  1895  1896  1897  1898  1899  1900  1901  1902  1903 
+##     1     3     2     3     4     1     6     4     2     1     5     4     2 
+##  1904  1905  1906  1907  1908  1909  1910  1911  1912  1913  1914  1916  1917 
+##     2     1     1     3     2     3     3     9     4     2     3     3     6 
+##  1918  1919  1920  1921  1922  1923  1924  1925  1926  1927  1928  1929  1930 
+##     1     5     5     8     7    13    15    11    12    13    13     6    24 
+##  1931  1932  1933  1934  1935  1936  1937  1938  1939  1940  1941  1942  1943 
+##    21    28    35    50    41    50    49    45    46    51    54    43    30 
+##  1944  1945  1946  1947  1948  1949  1950  1951  1952  1953  1954  1955  1956 
+##    37    31    40    50    83    77   139   114   146   158   147   166   174 
+##  1957  1958  1959  1960  1961  1962  1963  1964  1965  1966  1967  1968  1969 
+##   207   198   232   284   342   326   366   407   500   535   643   705   720 
+##  1970  1971  1972  1973  1974  1975  1976  1977  1978  1979  1980  1981  1982 
+##   785   862   897  1007  1066  1156  1261  1283  1322  1457  1563  1471  1549 
+##  1983  1984  1985  1986  1987  1988  1989  1990  1991  1992  1993  1994  1995 
+##  1643  1785  1785  2169  2218  2516  2730  3246  3266  3399  3850  3975  3906 
+##  1996  1997  1998  1999  2000  2001  2002  2003  2004  2005  2006  2007  2008 
+##  4325  5259  6232  6072  6697  8004  8138  8984  9280  9010 10641  9923 11616 
+##  2009  2010  2011  2012  2013  2014  2015  2016  2017  2018  2019  2020  2021 
+##  9571 10842 10306 12227 12092 12613 12580 14946 16886 18558 21342 26584 24584 
+##  2022  2023  2024 
+## 27859 21906     9
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Plot full table}
+\FunctionTok{ggplot}\NormalTok{(data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ year)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{fill =} \StringTok{"steelblue"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Year"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Number of papers"}\NormalTok{, }\AttributeTok{title =} \StringTok{"Number of papers per year"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-8-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Subset the data into different time intervals}
+\NormalTok{data\_1975\_2024 }\OtherTok{\textless{}{-}}\NormalTok{ data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(year }\SpecialCharTok{\textgreater{}=} \DecValTok{1975} \SpecialCharTok{\&}\NormalTok{ year }\SpecialCharTok{\textless{}=} \DecValTok{2024}\NormalTok{)}
+\NormalTok{data\_1950\_1975 }\OtherTok{\textless{}{-}}\NormalTok{ data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(year }\SpecialCharTok{\textgreater{}=} \DecValTok{1950} \SpecialCharTok{\&}\NormalTok{ year }\SpecialCharTok{\textless{}} \DecValTok{1975}\NormalTok{)}
+\NormalTok{data\_1900\_1950 }\OtherTok{\textless{}{-}}\NormalTok{ data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(year }\SpecialCharTok{\textgreater{}=} \DecValTok{1900} \SpecialCharTok{\&}\NormalTok{ year }\SpecialCharTok{\textless{}} \DecValTok{1950}\NormalTok{)}
+\NormalTok{data\_1824\_1900 }\OtherTok{\textless{}{-}}\NormalTok{ data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(year }\SpecialCharTok{\textgreater{}=} \DecValTok{1824} \SpecialCharTok{\&}\NormalTok{ year }\SpecialCharTok{\textless{}} \DecValTok{1900}\NormalTok{)}
+\NormalTok{data\_1672\_1824 }\OtherTok{\textless{}{-}}\NormalTok{ data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(year }\SpecialCharTok{\textgreater{}=} \DecValTok{1672} \SpecialCharTok{\&}\NormalTok{ year }\SpecialCharTok{\textless{}} \DecValTok{1824}\NormalTok{)}
+
+\CommentTok{\# Plot for each subset}
+
+\CommentTok{\# Plot for 1975 {-} 2024}
+\FunctionTok{ggplot}\NormalTok{(data\_1975\_2024, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{year)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{fill =} \StringTok{"violet"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+\FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Year"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Number of papers"}\NormalTok{, }\AttributeTok{title =} \StringTok{"1975 {-} 2024"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-8-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot for 1950 {-} 1975}
+\FunctionTok{ggplot}\NormalTok{(data\_1950\_1975, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{year)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{fill =} \StringTok{"violet"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+\FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Year"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Number of papers"}\NormalTok{, }\AttributeTok{title =} \StringTok{"1950 {-} 1975"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-8-4.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot for 1900 {-} 1950}
+\FunctionTok{ggplot}\NormalTok{(data\_1900\_1950, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{year)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{fill =} \StringTok{"violet"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+\FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Year"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Number of papers"}\NormalTok{, }\AttributeTok{title =} \StringTok{"1900 {-} 1950"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-8-5.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot for 1824 {-} 1900}
+\FunctionTok{ggplot}\NormalTok{(data\_1824\_1900, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{year)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{fill =} \StringTok{"violet"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+\FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Year"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Number of papers"}\NormalTok{, }\AttributeTok{title =} \StringTok{"1824 {-} 1900"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-8-6.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot for 1672 {-} 1824}
+\FunctionTok{ggplot}\NormalTok{(data\_1672\_1824, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{year)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{fill =} \StringTok{"violet"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+\FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Year"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Number of papers"}\NormalTok{, }\AttributeTok{title =} \StringTok{"1672 {-} 1824"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Preprocessing_Feb_2024_files/figure-latex/unnamed-chunk-8-7.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Define the intervals}
+\NormalTok{intervals }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}
+  \FunctionTok{c}\NormalTok{(}\DecValTok{2020}\NormalTok{, }\DecValTok{2024}\NormalTok{),}
+  \FunctionTok{c}\NormalTok{(}\DecValTok{2015}\NormalTok{, }\DecValTok{2019}\NormalTok{),}
+  \FunctionTok{c}\NormalTok{(}\DecValTok{2010}\NormalTok{, }\DecValTok{2014}\NormalTok{),}
+  \FunctionTok{c}\NormalTok{(}\DecValTok{2005}\NormalTok{, }\DecValTok{2009}\NormalTok{),}
+  \FunctionTok{c}\NormalTok{(}\DecValTok{2000}\NormalTok{, }\DecValTok{2004}\NormalTok{),}
+  \FunctionTok{c}\NormalTok{(}\DecValTok{1995}\NormalTok{, }\DecValTok{1999}\NormalTok{),}
+  \FunctionTok{c}\NormalTok{(}\DecValTok{1985}\NormalTok{, }\DecValTok{1994}\NormalTok{),}
+  \FunctionTok{c}\NormalTok{(}\DecValTok{1975}\NormalTok{, }\DecValTok{1984}\NormalTok{),}
+  \FunctionTok{c}\NormalTok{(}\DecValTok{1965}\NormalTok{, }\DecValTok{1974}\NormalTok{),}
+  \FunctionTok{c}\NormalTok{(}\DecValTok{1900}\NormalTok{, }\DecValTok{1964}\NormalTok{),}
+  \FunctionTok{c}\NormalTok{(}\DecValTok{1672}\NormalTok{, }\DecValTok{1899}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# Create a column for each interval}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \FunctionTok{seq\_along}\NormalTok{(intervals)) \{}
+\NormalTok{  interval }\OtherTok{\textless{}{-}}\NormalTok{ intervals[[i]]}
+\NormalTok{  start }\OtherTok{\textless{}{-}}\NormalTok{ interval[}\DecValTok{1}\NormalTok{]}
+\NormalTok{  end }\OtherTok{\textless{}{-}}\NormalTok{ interval[}\DecValTok{2}\NormalTok{]}
+\NormalTok{  column\_name }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"pub\_interval\_"}\NormalTok{, start, }\StringTok{"\_"}\NormalTok{, end)}
+\NormalTok{  data[[column\_name]] }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{year }\SpecialCharTok{\textgreater{}=}\NormalTok{ start }\SpecialCharTok{\&}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{year }\SpecialCharTok{\textless{}=}\NormalTok{ end, }\DecValTok{1}\NormalTok{, }\DecValTok{0}\NormalTok{)}
+\NormalTok{\}}
+
+\FunctionTok{write.csv}\NormalTok{(data, }\StringTok{"preprocessed\_data\_Feb\_2024.csv"}\NormalTok{, }\AttributeTok{row.names =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+
+\end{document}

@@ -1,0 +1,178 @@
+---
+title: "KeyATM covariate analysis"
+author: "Charles J. Gomez, Harshvardhan Singh"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Preparation
+## Loading data for quanteda
+
+```{r}
+# Load the library
+library(keyATM)
+library(quanteda)
+#library(readtext)
+
+# Read the CSV file
+data <- read.csv("preprocessed_data_Jul14.csv")
+
+# Select only columns 9 to 38 as metadata
+metadata <- data[, 9:38]
+
+# Create a corpus from the 'concatenated_title_abstract' column and add the metadata
+key_corpus <- corpus(data$concatenated_title_abstract, docvars = metadata)
+key_corpus
+
+# Check the document-level variables
+#vars <- docvars(key_corpus)
+#head(vars)
+
+# Creating token object
+key_token <- tokens(key_corpus)
+key_token
+
+# Creating a document-feature matrix (dfm object) from the token object
+key_dfm <- dfm(key_token)
+key_dfm
+
+```
+
+## Preprocessing data
+
+```{r}
+
+library(keyATM)
+library(quanteda)
+library(magrittr)
+
+#remove punctuations and unnecessary characters
+data_tokens <- tokens(
+    data$concatenated_title_abstract,
+    remove_numbers = FALSE,
+    remove_punct = TRUE,
+    remove_symbols = TRUE,
+    remove_separators = TRUE,
+    remove_url = TRUE
+  ) %>%
+  tokens_tolower() %>%    #converts all characters into lower cases
+  tokens_remove(
+    c(stopwords("english")
+    )
+  ) %>%
+  tokens_select(min_nchar = 3)
+
+#Before loading data into the keyATM, construct a document-feature matrix (dfm object)
+data_dfm <- dfm(data_tokens) %>%
+              dfm_trim(min_termfreq = 15, min_docfreq = 15)
+ncol(data_dfm)  # the number of unique words
+
+
+# Filter out documents with length 0
+#data_dfm <- data_dfm[ndoc(data_dfm) > 0, ]
+#data_dfm <- dfm_subset(data_dfm, ntoken(data_dfm) > 0)
+
+# Read the document-feature matrix using keyATM_read()
+keyATM_docs <- keyATM_read(texts = data_dfm)
+
+# Summary of keyATM_docs
+summary(keyATM_docs)
+
+```
+Preparing keywords
+
+```{r}
+keywords <- list(
+ Topic1 = c("univers", "year", "earli", "scienc", "cosmic", "astronomi", "million", "physic", "billion", "big"), 
+ Topic2 = c("studi", "physic", "discuss", "observ", "provid", "properti", "import", "process", "new", "evolut"),
+ Topic3 = c("energi", "ray", "acceler", "particl", "cosmic", "electron", "spectrum", "radiat", "gamma-ray", "tev"),
+ Topic4 = c("dwarf", "white", "brown", "nova", "object", "type", "member", "spectral", "candid", "young"),
+ Topic5 = c("disk", "accret", "disc", "rate", "inner", "flow", "thick", "around", "radius", "outer"),
+ Topic6 = c("gravit", "detect", "event", "neutrino", "wave", "will", "microlens", "signal", "search", "detector"),
+ Topic7 = c("simul", "effect", "numer", "result", "evolut", "dynam", "instabl", "equat", "initi", "momentum"),
+ Topic8 = c("period", "variabl", "light", "variat", "observ", "curv", "time", "day", "chang", "pulsat"),
+ Topic9 = c("activ", "agn", "galaxi", "nuclei", "ngc", "galact", "starburst", "nucleus", "luminos", "seyfert"),
+ Topic10 = c("star", "stellar", "massiv", "giant", "sequenc", "young", "evolv", "red", "rotat", "low-mass"),
+ Topic11 = c("model", "observ", "predict", "use", "fit", "effect", "paramet", "calcul", "data", "spectra"),
+ Topic12 = c("abund", "ratio", "interstellar", "measur", "valu", "element", "deriv", "hydrogen", "medium", "densiti"),
+ Topic13 = c("measur", "use", "paramet", "estim", "data", "method", "lens", "determin", "can", "correl"),
+ Topic14 = c("halo", "dark", "matter", "simul", "galaxi", "cosmolog", "densiti", "satellit", "model", "baryon"),
+ Topic15 = c("element", "solar", "composit", "core", "helium", "mix", "chemic", "abund", "isotop", "materi"),
+ Topic16 = c("galact", "way", "milki", "center", "tidal", "plane", "sgr", "stream", "disrupt", "kpc"),
+ Topic17 = c("x-ray", "kev", "observ", "hard", "chandra", "luminos", "spectral", "soft", "erg", "state"),
+ Topic18 = c("mass", "function", "stellar", "per", "rate", "distribut", "fraction", "luminos", "cent", "evolut"),
+ Topic19 = c("sourc", "detect", "object", "optic", "emiss", "compact", "region", "limit", "associ", "observ"),
+ Topic20 = c("cluster", "group", "globular", "ngc", "system", "core", "distribut", "gcs", "central", "galaxi"),
+ Topic21 = c("radio", "jet", "emiss", "observ", "ghz", "relativist", "array", "power", "synchrotron", "vla"),
+ Topic22 = c("background", "cosmic", "cosmolog", "scale", "power", "redshift", "spectrum", "microwav", "reioniz", "fluctuat"),
+ Topic23 = c("pulsar", "neutron", "puls", "time", "millisecond", "spin", "psr", "observ", "magnetar", "emiss"),
+ Topic24 = c("magnet", "field", "polar", "rotat", "turbul", "strength", "strong", "surfac", "flow", "plasma"),
+ Topic25 = c("burst", "gamma-ray", "grb", "grbs", "afterglow", "emiss", "energi", "observ", "time", "short"),
+ Topic26 = c("supernova", "type", "remnant", "progenitor", "sn", "explos", "light", "ejecta", "sne", "type ia"),
+ Topic27 = c("dust", "grain", "emiss", "ir", "absorpt", "scat", "temperatur", "composit", "band", "interstellar"),
+ Topic28 = c("gas", "cold", "hot", "molecular", "densiti", "temperatur", "cloud", "interstellar", "cool", "hydrogen"),
+ Topic29 = c("black", "hole", "accret", "mass", "disc", "x-ray", "binari", "bh", "mbh", "spin"),
+ Topic30 = c("orbit", "period", "binari", "eclips", "compan", "semi", "eccentric", "major", "axis", "mass"),
+ Topic31 = c("wind", "stellar", "mass", "loss", "rate", "shock", "bubble", "outflow", "star", "drive"),
+ Topic32 = c("planet", "exoplanet", "transit", "jupiter", "earth", "orbit", "gas", "giant", "habitable", "zone"),
+ Topic33 = c("solar", "sun", "corona", "flare", "activ", "cycle", "spot", "wind", "heliospher", "observ"),
+ Topic34 = c("star", "format", "young", "protostellar", "disc", "object", "pre-main", "sequenc", "t tauri", "region"),
+ Topic35 = c("molecular", "co", "cloud", "line", "h2", "gas", "dense", "nh3", "ratio", "observ"),
+ Topic36 = c("spiral", "galaxi", "arm", "bar", "disc", "ngc", "m31", "pattern", "rotation", "bulge"),
+ Topic37 = c("quasar", "blazar", "bl", "lac", "agn", "redshift", "spectra", "line", "emiss", "broad"),
+ Topic38 = c("nebula", "hii", "region", "pn", "planetary", "emiss", "ring", "ioniz", "oiii", "ngc"),
+ Topic39 = c("velocity", "dispers", "rotation", "radial", "curve", "v", "kinematic", "line", "width", "motion"),
+ Topic40 = c("light", "curve", "photometri", "magnitude", "brightness", "flux", "variabl", "color", "intens", "spot"),
+ Topic41 = c("telescope", "observ", "instrument", "spectrograph", "detector", "ccd", "array", "mirror", "pixel", "image"),
+ Topic42 = c("infrared", "ir", "emiss", "flux", "wavelength", "spectral", "photometri", "temperature", "band", "radiation"),
+ Topic43 = c("redshift", "distance", "cosmolog", "universe", "luminosity", "z", "spectroscop", "far", "high", "expansion"),
+ Topic44 = c("spectrum", "line", "emission", "spectral", "wavelength", "feature", "flux", "absorption", "continuum", "spectroscop"),
+ Topic45 = c("comet", "asteroid", "meteor", "solar system", "orbit", "nucleus", "dust", "tail", "crater", "impact")
+)
+
+
+
+```
+Checking Keywords
+```{r}
+key_viz <- visualize_keywords(docs = keyATM_docs, keywords = keywords)
+key_viz
+
+#save figure
+key_viz <- visualize_keywords(docs = keyATM_docs, keywords = keywords)
+#save_fig(key_viz, "/Users/harshvardhansingh/Documents/keyword.pdf", width = 6.5, height = 4)
+
+#get the actual values
+values_fig(key_viz)
+```
+Preparing Covariates
+```{r}
+vars <- docvars(key_dfm)
+head(vars)
+
+#vars_selected %>%
+#  mutate(Countries  = factor(Party,
+#                         levels = c("Other", "Republican", "Democratic")),
+#         Period = factor(Period,
+#                         levels = c("18_19c", "20_21c"))) -> vars_selected
+```
+# Fitting the Model: KeyATM Covariates (and results)
+```{r}
+out <- keyATM(
+  docs              = keyATM_docs,
+  no_keyword_topics = 0,
+  keywords          = keywords,
+  model             = "covariates",
+  model_settings    = list(covariates_data    = vars,
+                           covariates_formula = ~ US + IN + DE + CH + GB + CN + FR + IT + RU + CA + NL + AU + JP + ES + IL + Americas + Europe + Africa + AsiaAndOceania + pub_interval_2020_2022 + pub_interval_2015_2019 + pub_interval_2010_2014 + pub_interval_2005_2009 + pub_interval_2000_2004 + pub_interval_1995_1999 + pub_interval_1985_1994 + pub_interval_1975_1984  + pub_interval_1965_1974 + pub_interval_1900_1964),
+  options           = list(seed = 250)
+) 
+
+```

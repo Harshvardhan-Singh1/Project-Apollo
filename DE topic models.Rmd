@@ -1,0 +1,265 @@
+---
+title: "DE topic models"
+author: "Charlie J. Gomez, Harshvardhan Singh"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library('stm')
+library(dplyr)
+library(stringr)
+library(wordcloud)
+#Read csv file
+data = read.csv("preprocessed_data_Jul14.csv")
+
+
+##Topic generation for DE (in collaboration) publications
+
+data_collab <- data[data[["DE"]] != 0,]
+
+# Save the original title data for future use
+data_collab$original_concatenated_title_abstract <- data_collab$concatenated_title_abstract
+
+#pre-processing the titles using textProcessor from the stm package
+processed_text <- textProcessor(data_collab$concatenated_title_abstract, metadata = data_collab) 
+
+# Further prepare the data by removing low-frequency terms
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta)
+docs_text <- out_text$documents
+vocab_text <- out_text$vocab
+meta_text <- out_text$meta
+
+
+#Prepare data
+plotRemoved(processed_text$documents, lower.thresh = seq(1, 200, by = 100))
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta, lower.thresh = 8)
+
+str(out_text$meta)
+
+# Initialize an empty formula string
+prevalence_formula_str <- "~"
+
+# Define the publication intervals
+pub_intervals <- c("pub_interval_2020_2022", "pub_interval_2015_2019", "pub_interval_2010_2014", 
+                   "pub_interval_2005_2009", "pub_interval_2000_2004", "pub_interval_1995_1999",
+                   "pub_interval_1985_1994", "pub_interval_1975_1984", "pub_interval_1965_1974",
+                   "pub_interval_1900_1964", "pub_interval_1824_1899")
+
+# Add each publication interval to the formula string
+for (interval in pub_intervals) {
+  # add an if statement to handle the first addition (without '+')
+  if (prevalence_formula_str == "~") {
+    prevalence_formula_str <- paste(prevalence_formula_str, interval)
+  } else {
+    prevalence_formula_str <- paste(prevalence_formula_str, "+", interval)
+  }
+}
+
+
+# Convert the string to a formula
+prevalence_formula <- as.formula(prevalence_formula_str)
+print(prevalence_formula)
+
+# Run STM model
+Research_topics <- stm(documents = out_text$documents, 
+                             vocab = out_text$vocab, 
+                             K = 44, 
+                             prevalence = prevalence_formula, 
+                             data = out_text$meta, 
+                             init.type = "Spectral",
+                             max.em.its = 1000,
+                             gamma.prior = 'L1')
+
+# Plot the STM model summary
+plot(Research_topics, type = "summary", xlim = c(0, 0.3))
+
+# Print the top 10 labels for each topic
+topic_labels <- labelTopics(Research_topics, n=10)
+print(topic_labels)
+
+# Match the processed documents with the original titles
+matched_titles <- out_text$meta$original_concatenated_title_abstract
+
+# Print top 5 documents for each topic
+top_docs <- findThoughts(Research_topics, texts = matched_titles, n = 5)$docs[[1]]
+print(top_docs)
+
+# Find and plot the key "thoughts" or documents for selected topics
+thoughts6 <- findThoughts(Research_topics, texts = matched_titles, n = 3, topics = 6)$docs[[1]]
+thoughts18 <- findThoughts(Research_topics, texts = matched_titles, n = 3, topics = 18)$docs[[1]]
+par(mfrow = c(1, 2), mar = c(0.5, 0.5, 1, 0.5))
+plotQuote(thoughts6, width = 30, main = "Topic 6")
+plotQuote(thoughts18, width = 30, main = "Topic 18")
+
+# Calculate and plot the correlation between topics
+mod.out.corr <- topicCorr(Research_topics)
+plot(mod.out.corr, cex = 1.5)
+
+
+# For each topic
+for (topic_num in 1:44) {
+  # Plot the word cloud
+  cloud(Research_topics, topic = topic_num, scale = c(2, 0.25))
+  Sys.sleep(2)
+}
+
+# Get the topic proportions for each document
+topic_proportions <- Research_topics$theta
+
+# Find the index of the topic with the highest proportion for each document
+# This will be the topic that each document is most likely to belong to
+max_topic_idx <- apply(topic_proportions, 1, which.max)
+
+# Add this as a new column to your data
+data_collab$topic <- max_topic_idx
+
+library(ggplot2)
+
+# Define the intervals
+intervals <- c('1824_1899', '1900_1964', '1965_1974', '1975_1984', '1985_1994', '1995_1999', '2000_2004', '2005_2009', '2010_2014', '2015_2019', '2020_2022')
+colors <- c('pink', 'blue', 'purple', 'yellow', 'green', 'pink', 'orange', 'violet', 'green', 'blue', 'pink')
+
+# Loop through the intervals and plot
+for(i in seq_along(intervals)){
+  # Filter data for when the pub_interval is equal to 1
+  data_filtered <- data_collab[data_collab[[paste0('pub_interval_', intervals[i])]] == 1,]
+  
+  # Make the histogram
+ 
+    p <- ggplot(data_filtered, aes(x = topic)) +
+    geom_histogram(binwidth = 1, fill = colors[i], color = "black") +
+    xlab("Topic") +
+    ylab("Count") +
+    ggtitle(paste0("Topics from year ", gsub("_", " to ", intervals[i])))
+    
+    print(p)
+}
+
+
+##Topic generation for DE (independent) publications
+
+data_independent <- data[data[["DE"]] == 100,]
+
+# Save the original title data for future use
+data_independent$original_concatenated_title_abstract <- data_independent$concatenated_title_abstract
+
+#pre-processing the titles using textProcessor from the stm package
+processed_text <- textProcessor(data_independent$concatenated_title_abstract, metadata = data_independent) 
+
+# Further prepare the data by removing low-frequency terms
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta)
+docs_text <- out_text$documents
+vocab_text <- out_text$vocab
+meta_text <- out_text$meta
+
+
+#Prepare data
+plotRemoved(processed_text$documents, lower.thresh = seq(1, 200, by = 100))
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta, lower.thresh = 8)
+
+str(out_text$meta)
+
+# Initialize an empty formula string
+prevalence_formula_str <- "~"
+
+# Define the publication intervals
+pub_intervals <- c("pub_interval_2020_2022", "pub_interval_2015_2019", "pub_interval_2010_2014", 
+                   "pub_interval_2005_2009", "pub_interval_2000_2004", "pub_interval_1995_1999",
+                   "pub_interval_1985_1994", "pub_interval_1975_1984", "pub_interval_1965_1974",
+                   "pub_interval_1900_1964", "pub_interval_1824_1899")
+
+# Add each publication interval to the formula string
+for (interval in pub_intervals) {
+  # add an if statement to handle the first addition (without '+')
+  if (prevalence_formula_str == "~") {
+    prevalence_formula_str <- paste(prevalence_formula_str, interval)
+  } else {
+    prevalence_formula_str <- paste(prevalence_formula_str, "+", interval)
+  }
+}
+
+
+# Convert the string to a formula
+prevalence_formula <- as.formula(prevalence_formula_str)
+print(prevalence_formula)
+
+# Run STM model
+Research_topics <- stm(documents = out_text$documents, 
+                             vocab = out_text$vocab, 
+                             K = 44, 
+                             prevalence = prevalence_formula, 
+                             data = out_text$meta, 
+                             init.type = "Spectral",
+                             max.em.its = 1000,
+                             gamma.prior = 'L1')
+
+# Plot the STM model summary
+plot(Research_topics, type = "summary", xlim = c(0, 0.3))
+
+# Print the top 10 labels for each topic
+topic_labels <- labelTopics(Research_topics, n=10)
+print(topic_labels)
+
+# Match the processed documents with the original titles
+matched_titles <- out_text$meta$original_concatenated_title_abstract
+
+# Print top 5 documents for each topic
+top_docs <- findThoughts(Research_topics, texts = matched_titles, n = 5)$docs[[1]]
+print(top_docs)
+
+# Find and plot the key "thoughts" or documents for selected topics
+thoughts6 <- findThoughts(Research_topics, texts = matched_titles, n = 3, topics = 6)$docs[[1]]
+thoughts18 <- findThoughts(Research_topics, texts = matched_titles, n = 3, topics = 18)$docs[[1]]
+par(mfrow = c(1, 2), mar = c(0.5, 0.5, 1, 0.5))
+plotQuote(thoughts6, width = 30, main = "Topic 6")
+plotQuote(thoughts18, width = 30, main = "Topic 18")
+
+# Calculate and plot the correlation between topics
+mod.out.corr <- topicCorr(Research_topics)
+plot(mod.out.corr, cex = 1.5)
+
+
+# For each topic
+for (topic_num in 1:44) {
+  # Plot the word cloud
+  cloud(Research_topics, topic = topic_num, scale = c(2, 0.25))
+  Sys.sleep(2)
+}
+
+# Get the topic proportions for each document
+topic_proportions <- Research_topics$theta
+
+# Find the index of the topic with the highest proportion for each document
+# This will be the topic that each document is most likely to belong to
+max_topic_idx <- apply(topic_proportions, 1, which.max)
+
+# Add this as a new column to your data
+data_independent$topic <- max_topic_idx
+
+
+
+# Define the intervals
+intervals <- c('1824_1899', '1900_1964', '1965_1974', '1975_1984', '1985_1994', '1995_1999', '2000_2004', '2005_2009', '2010_2014', '2015_2019', '2020_2022')
+colors <- c('pink', 'blue', 'purple', 'yellow', 'green', 'pink', 'orange', 'violet', 'green', 'blue', 'pink')
+
+# Loop through the intervals and plot
+for(i in seq_along(intervals)){
+  # Filter data for when the pub_interval is equal to 1
+  data_filtered <- data_independent[data_independent[[paste0('pub_interval_', intervals[i])]] == 1,]
+  
+  # Make the histogram
+ 
+    p <- ggplot(data_filtered, aes(x = topic)) +
+    geom_histogram(binwidth = 1, fill = colors[i], color = "black") +
+    xlab("Topic") +
+    ylab("Count") +
+    ggtitle(paste0("Topics from year ", gsub("_", " to ", intervals[i])))
+    
+    print(p)
+}
+```

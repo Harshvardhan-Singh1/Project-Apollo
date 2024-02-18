@@ -1,0 +1,23 @@
+---
+title: "JSONL file preprocessing"
+author: "Charlie J. Gomez, Harshvardhan Singh"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r cache=TRUE}
+
+library(jsonlite)
+library(dplyr)
+
+
+file_path <- "Astronomy_Constellate_FullText_Metadata_JSONL"
+#data_JSONL <- stream_in(textConnection(readLines(file_path)))
+data_JSONL <- stream_in(textConnection(readLines(file_path)), simplifyDataFrame = FALSE)
+
+```
+

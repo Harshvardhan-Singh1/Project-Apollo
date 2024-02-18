@@ -1,0 +1,568 @@
+---
+title: "Preprocessing"
+author: "Charles J. Gomez, Harshvardhan Singh"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+The country column in our dataset contains a more detailed information about the authors' affiliations, including first, middle, and last authors. However, this brings a level of complexity and potential confusion for machine learning models. Therefore, we propose a method to simplify the country column by retaining only the first and last author affiliations, ensuring a more straightforward representation of authorship.
+
+Moreover, we collapse the countries (except the top 15 countries) into the following regions -
+North/South America
+Europe
+Asia/Oceania
+Africa
+
+List of Countries-
+
+**Top 15 - 91.47% of global contribution (New Data)** 
+1. USA (US) - 
+2. China (CN) - 
+3. Great Britain (GB) - 
+4. Germany (DE) -
+5. Japan (JP) -
+6. France (FR)
+7. Italy (IT)
+8. 
+
+**Top 15 - 91.47% of global contribution (Old Data)** 
+1. USA (US) - 50.61%
+2. Great Britain (GB) - 10.13%
+3. Germany (DE) - 5.73%
+4. Italy (IT) - 3.84%
+5. Australia (AU) - 2.82%
+6. Canada (CA) - 2.67%
+7. Japan (JP) - 2.59%
+8. China (CN) - 2.18%
+9. Netherlands (NL) - 2.01%
+10. France (FR) - 1.98% 
+11. Russia (RU) - 1.85% 
+12. Spain (ES) - 1.78% 
+13. India (IN) - 1.42% 
+14. Israel (IL) - 0.96% 
+15. Switzerland (CH) - 0.90%
+
+
+**The Americas (North/South America)**
+1. BR - Brazil
+2. CL - Chile
+3. VE - Venezuela
+4. MX - Mexico
+5. CO - Colombia
+6. AR - Argentina
+7. UY - Uruguay
+8. JM - Jamaica
+9. CR - Costa Rica
+10. GT - Guatemala
+11. HN - Honduras
+12. PR - Puerto Rico
+13. VI - U.S. Virgin Islands
+14. BO - Bolivia
+15. PE - Peru
+16. EC - Ecuador
+17. CU - Cuba
+
+**Europe**
+1. RS - Serbia
+2. DK - Denmark
+3. SE - Sweden
+4. BE - Belgium
+5. PL - Poland
+6. IE - Ireland
+7. FI - Finland
+8. AT - Austria
+9. HU - Hungary
+10. LV - Latvia
+11. UA - Ukraine
+12. GE - Georgia
+13. GR - Greece
+14. HR - Croatia
+15. TR - Turkey
+16. AM - Armenia
+17. CZ - Czech Republic
+18. PT - Portugal
+19. SK - Slovakia
+20. IS - Iceland
+21. NO - Norway
+22. BG - Bulgaria
+23. SI - Slovenia
+24. EE - Estonia
+25. CY - Cyprus
+26. LU - Luxembourg
+27. MT - Malta
+28. MK - North Macedonia
+29. RO - Romania
+30. LT - Lithuania
+
+**Africa**
+1. NG - Nigeria
+2. MZ - Mozambique
+3. BW - Botswana
+4. ZA - South Africa
+5. GH - Ghana
+6. RW - Rwanda
+7. UG - Uganda
+8. EG - Egypt
+9. TZ - Tanzania
+10. MU - Mauritius
+11. ZW - Zimbabwe
+12. NA - Namibia
+13. SD - Sudan
+14. TN - Tunisia
+15. BD - Burundi
+
+**Asia/Oceania**
+1. KR - South Korea
+2. TW - Taiwan
+3. IR - Iran
+4. KZ - Kazakhstan
+5. KH - Cambodia
+6. PK - Pakistan
+7. VN - Vietnam
+8. MY - Malaysia
+9. SA - Saudi Arabia
+10. UZ - Uzbekistan
+11. TH - Thailand
+12. NP - Nepal
+13. LK - Sri Lanka
+14. ID - Indonesia
+15. TJ - Tajikistan
+16. AE - United Arab Emirates
+17. LB - Lebanon
+18. SG - Singapore
+19. AZ - Azerbaijan
+20. IQ - Iraq
+21. OM - Oman
+22. KW - Kuwait
+23. QA - Qatar
+24. NZ - New Zealand
+25. PS - Palestine
+26. BD - Bangladesh
+
+```{r}
+library(stringr)
+
+data = read.csv("filtered_data_feb_2024.csv")
+data_CountryColumn <- data$country
+
+data$concatenated_title_abstract <- paste(data$title, data$paperabstract, sep = " ")
+
+#We removed all instances of middle authors' country codes. This step involved replacing the pattern "\w+\+middle" with an empty string, effectively eliminating all middle author affiliations. The resulting country codes were then trimmed to remove any leading or trailing spaces
+
+data$country <- gsub("\\w+\\+middle", "", data$country)
+data$country <- trimws(data$country)
+print(head(data$country, 50))
+
+#We removed the "+first" and "+last" strings from the remaining country codes using another regular expression substitution. The pattern "\+last|\+first" was replaced with an empty string, ensuring that only the country codes remained
+
+data$country <- gsub("\\+last|\\+first", "", data$country)
+# Remove any extra spaces resulting from the removal
+data$country <- sapply(strsplit(data$country, "\\s+"), function(x) paste(x[x != ""], collapse = " "))
+
+print(head(data$country, 50))
+
+
+
+# calculate the percentage count of each country code in a vector
+#calculate_percentage <- function(vec) {
+#  counts <- table(vec)
+#  percentages <- prop.table(counts) * 100
+#  formatted <- paste0(round(percentages, 1), "%", names(percentages))
+#  paste(formatted, collapse = " ")
+#}
+
+# Apply the calculate_percentage function to each row in the 'country' column
+#data$country <- sapply(strsplit(data$country, "\\s+"), calculate_percentage)
+
+# Print the modified 'country' column (first 20)
+#print(head(data$country, 50))
+
+
+
+
+# Calculate percentage count of each country code in a vector
+calculate_percentage <- function(vec) {
+  counts <- table(vec)
+  percentages <- prop.table(counts) * 100
+  formatted_percentages <- round(percentages, 2)
+  return(percentages)
+}
+
+# Apply the calculate_percentage function to each row in the 'country' column
+percentage_counts <- lapply(strsplit(data$country, "\\s+"), calculate_percentage)
+
+# Get all unique countries
+all_countries <- unique(unlist(lapply(percentage_counts, names)))
+
+# Initialize a new data frame to hold the percentages
+percentage_df <- data.frame(matrix(ncol = length(all_countries), nrow = length(percentage_counts)))
+names(percentage_df) <- all_countries
+
+# Fill the data frame with percentages
+for (i in seq_along(percentage_counts)) {
+  country_names <- names(percentage_counts[[i]])
+  country_percentages <- percentage_counts[[i]]
+  percentage_df[i, country_names] <- country_percentages
+}
+
+# Replace NA values with 0
+percentage_df[is.na(percentage_df)] <- 0
+
+# Combine the original data with the new percentage-encoded country columns
+data <- cbind(data, percentage_df)
+
+# Summary of dataframe
+summary(data)
+
+# structure of the dataframe
+str(data)
+
+```
+
+```{r}
+
+# Load the necessary libraries
+library(ggplot2)
+library(dplyr)
+
+#Histogram by number of articles each country has contributed to
+
+# Calculate count of each country code in a vector
+calculate_count <- function(vec) {
+  counts <- table(vec)
+  return(counts)
+}
+
+# Apply the calculate_count function to each row in the 'country' column
+counts <- lapply(strsplit(data$country, "\\s+"), calculate_count)
+
+# Get all unique countries
+all_countries <- unique(unlist(lapply(counts, names)))
+
+# Initialize a new data frame to hold the counts
+count_df <- data.frame(matrix(ncol = length(all_countries), nrow = length(counts)))
+names(count_df) <- all_countries
+
+# Fill the data frame with counts
+for (i in seq_along(counts)) {
+  country_names <- names(counts[[i]])
+  country_counts <- counts[[i]]
+  count_df[i, country_names] <- country_counts
+}
+
+# Replace NA values with 0
+count_df[is.na(count_df)] <- 0
+
+# Combine all countries into one column for the histogram
+all_countries_df <- stack(count_df)
+
+# Rename the columns
+colnames(all_countries_df) <- c("Count", "Country")
+
+# Remove rows where count is zero
+all_countries_df <- all_countries_df[all_countries_df$Count > 0,]
+
+# Calculate the total counts for each country
+all_countries_df <- all_countries_df %>%
+  group_by(Country) %>%
+  summarise(Total = sum(Count)) %>%
+  arrange(desc(Total))
+
+# Split the data frame into 5 equal parts
+split_data <- split(all_countries_df, cut(seq(nrow(all_countries_df)), 5, labels = FALSE))
+
+# Create a list to store the plots
+plot_list <- list()
+
+# Iterate over each subset of data and create a histogram with count
+plot_list <- lapply(1:5, function(i) {
+  ggplot(split_data[[i]], aes(x=reorder(Country, -Total), y=Total)) +
+    geom_bar(stat="identity", fill="steelblue") +
+    geom_text(aes(label=Total), vjust=-0.5, size=2.5) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x="Country", y="Number of Contributions", 
+         title = paste("Research Publications by Country: Part", i))
+})
+
+```
+
+```{r}
+
+# View each plot by calling it from the list
+plot_list[[1]]
+plot_list[[2]]
+plot_list[[3]]
+plot_list[[4]]
+plot_list[[5]]
+
+```
+
+```{r}
+
+#Histogram of total research contributions by country
+
+
+# Combine all countries into one column for the histogram
+all_countries_df <- stack(percentage_df)
+
+# Rename the columns
+colnames(all_countries_df) <- c("Percentage", "Country")
+
+# Remove rows where percentage is zero
+all_countries_df <- all_countries_df[all_countries_df$Percentage > 0,]
+
+# Calculate the total percentage for each country
+all_countries_df <- all_countries_df %>%
+  group_by(Country) %>%
+  summarise(Total = sum(Percentage)) %>%
+  arrange(desc(Total))
+
+# Split the data frame into 5 equal parts
+split_data <- split(all_countries_df, cut(seq(nrow(all_countries_df)), 5, labels = FALSE))
+
+# Create a list to store the plots
+plot_list <- list()
+
+# Define the text size for each plot
+text_size <- c(1.5, 2, 2, 2.5, 2.5)
+
+# Iterate over each subset of data and create a histogram
+plot_list <- lapply(1:5, function(i) {
+  ggplot(split_data[[i]], aes(x=reorder(Country, -Total), y=Total)) +
+    geom_bar(stat="identity", fill="purple") +
+    geom_text(aes(label=sprintf("%.2f", Total)), vjust=-0.5, size=text_size[i]) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x="Country", y="Total Contribution Count", 
+         title = paste("Total Research Contributions (total weight): Part", i))
+})
+
+```
+
+```{r}
+
+# View each plot by calling it from the list
+plot_list[[1]]
+plot_list[[2]]
+plot_list[[3]]
+plot_list[[4]]
+plot_list[[5]]
+
+```
+
+```{r}
+
+# Histogram of Research Contributions % by Country
+
+# Calculate total of all percentages
+total_percentage <- sum(all_countries_df$Total)
+
+# Express each country's contribution as a percentage of total
+all_countries_df <- all_countries_df %>%
+  mutate(Percentage_of_Total = Total / total_percentage * 100) %>%
+  arrange(desc(Percentage_of_Total))
+
+# Split the data frame into 5 equal parts
+split_data <- split(all_countries_df, cut(seq(nrow(all_countries_df)), 5, labels = FALSE))
+
+# Create a list to store the plots
+plot_list <- list()
+
+# Define the decimal places for each plot
+formats <- c("%.2f%%", "%.2f%%", "%.3f%%", "%.4f%%", "%.4f%%")
+
+# Define the text size for each plot
+text_size <- c(2.5, 2.5, 2, 2, 2)
+
+# Iterate over each subset of data and create a histogram
+plot_list <- lapply(1:5, function(i) {
+  ggplot(split_data[[i]], aes(x=reorder(Country, -Percentage_of_Total), y=Percentage_of_Total)) +
+    geom_bar(stat="identity", fill="orange") +
+    geom_text(aes(label=sprintf(formats[i], Percentage_of_Total)), vjust=-0.5, size=text_size[i]) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x="Country", y="Total Contribution", 
+         title = paste("Percentage Distribution of Global Research Contributions: Part", i))
+})
+
+```
+
+```{r}
+
+# View each plot by calling it from the list
+plot_list[[1]]
+plot_list[[2]]
+plot_list[[3]]
+plot_list[[4]]
+plot_list[[5]]
+
+```
+
+```{r}
+
+# List the country codes for each region
+
+north_america <- c('MX','PR','CU','DO','GT','HN','CR','PA','NI','SV','BZ','JM','TT','BS','VG','GD','BB','KN','AG','DM','GP','GF','MS','FK','HT')
+
+south_america <- c('BR','AR','CL','CO','VE','PE','EC','UY','PY','BO')
+
+
+europe <- c('PL','RO','NL','BE','GR','CZ','PT','SE','HU','BY','AT','CH','DK','FI','SK','NO','IE','HR','SI','LV','LT','EE','IS','MT','LU','MC','VA','RS','ME','MK','AL','BA','XK','UA','MD','BG','CY','TR','GE','AM','AZ','LI','SJ','JE','AX','FO','GI','BM','TC','SX','GL')
+
+
+
+africa <- c('DZ','AO','EG','LY','MA','SD','TN','ET','KE','TZ','UG','DZ','NG','GH','CI','SN','ML','CD','ZW','RW','ZM','MG','MW','AO','CM','BF','NE','MU','MZ','LS','BW','GM','TD','CG','NA','SS','SZ','BJ','LR','SL','GW','TG','CF','CI','GA','ST','SC','MR','BI','RE','ZA')
+
+
+
+asia <- c('KR','ID','TH','PK','MY','PH','VN','LK','BD','NP','MM','TW','HK','SG','MN','KH','LA','BT','MO','BN','MV','KW','AF','AE','SY','TJ','KZ','KG','IL','PS','LB','KP','BH','IQ','YE','JO','IR','QA','OM','UZ','TM','SA')
+
+
+oceania <- c('NZ','PG','FJ','VU','NC','PF','GU','WS','TO','PW')
+
+
+# Create the regional sum columns
+data$NorthAmerica <- rowSums(data[,north_america], na.rm = TRUE)
+data$SouthAmerica <- rowSums(data[,south_america], na.rm = TRUE)
+data$Europe <- rowSums(data[,europe], na.rm = TRUE)
+data$Africa <- rowSums(data[,africa], na.rm = TRUE)
+data$Asia <- rowSums(data[,asia], na.rm = TRUE)
+data$Oceania <- rowSums(data[,oceania], na.rm = TRUE)
+
+# drop the original country columns
+country_cols <- c(north_america, south_america, europe, africa, asia, oceania)
+data <- data[, !(names(data) %in% country_cols)]
+
+
+
+# Select the columns of interest
+selected_countries <- c('US', 'IN', 'DE', 'GB', 'CN', 'FR', 'IT', 'RU', 'CA', 'AU', 'JP', 'ES', 'NorthAmerica', 'SouthAmerica', 'Europe', 'Africa', 'Asia', 'Oceania')
+selected_data <- data[selected_countries]
+
+# Histogram by number of contributions each country or region has contributed to
+all_countries_df <- stack(selected_data)
+colnames(all_countries_df) <- c("Count", "Country")
+all_countries_df <- all_countries_df[all_countries_df$Count > 0,]
+
+# Calculate the total counts for each country
+all_countries_df <- all_countries_df %>%
+  group_by(Country) %>%
+  summarise(Total = sum(Count)) %>%
+  arrange(desc(Total))
+
+# Histogram of total research contributions by country
+all_countries_df <- stack(selected_data)
+colnames(all_countries_df) <- c("Count", "Country")
+all_countries_df <- all_countries_df[all_countries_df$Count > 0,]
+
+all_countries_df <- all_countries_df %>%
+  group_by(Country) %>%
+  summarise(Total = sum(Count)) %>%
+  arrange(desc(Total))
+
+# Histogram of Research Contributions % by Country
+total_percentage <- sum(all_countries_df$Total)
+all_countries_df <- all_countries_df %>%
+  mutate(Percentage_of_Total = Total / total_percentage * 100) %>%
+  arrange(desc(Percentage_of_Total))
+
+# Create the plot
+ggplot(all_countries_df, aes(x=reorder(Country, -Percentage_of_Total), y=Percentage_of_Total)) +
+  geom_bar(stat="identity", fill="red") +
+  geom_text(aes(label=sprintf("%.2f%%", Percentage_of_Total)), vjust=-0.5, size=2.5) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x="Country/Region", y="Percentage of Total Contributions", 
+       title = "Percentage Distribution of Global Research Contributions")
+
+
+# Find the smallest (earliest) year
+earliest_year <- min(data$year, na.rm = TRUE)
+print(paste("The earliest publication year is:", earliest_year))
+
+# Find the greatest (latest) year
+latest_year <- max(data$year, na.rm = TRUE)
+print(paste("The latest publication year is:", latest_year))
+
+#Create table for the count of publications in each year
+table(data$year)
+
+#Plot full table
+ggplot(data, aes(x = year)) +
+  geom_bar(fill = "steelblue") +
+  theme_minimal() +
+  labs(x = "Year", y = "Number of papers", title = "Number of papers per year")
+
+
+
+# Subset the data into different time intervals
+data_1975_2024 <- data %>% filter(year >= 1975 & year <= 2024)
+data_1950_1975 <- data %>% filter(year >= 1950 & year < 1975)
+data_1900_1950 <- data %>% filter(year >= 1900 & year < 1950)
+data_1824_1900 <- data %>% filter(year >= 1824 & year < 1900)
+data_1672_1824 <- data %>% filter(year >= 1672 & year < 1824)
+
+# Plot for each subset
+
+# Plot for 1975 - 2024
+ggplot(data_1975_2024, aes(x=year)) +
+  geom_bar(fill = "violet") +
+  theme_minimal() +
+labs(x = "Year", y = "Number of papers", title = "1975 - 2024")
+
+# Plot for 1950 - 1975
+ggplot(data_1950_1975, aes(x=year)) +
+  geom_bar(fill = "violet") +
+  theme_minimal() +
+labs(x = "Year", y = "Number of papers", title = "1950 - 1975")
+
+
+# Plot for 1900 - 1950
+ggplot(data_1900_1950, aes(x=year)) +
+  geom_bar(fill = "violet") +
+  theme_minimal() +
+labs(x = "Year", y = "Number of papers", title = "1900 - 1950")
+
+# Plot for 1824 - 1900
+ggplot(data_1824_1900, aes(x=year)) +
+  geom_bar(fill = "violet") +
+  theme_minimal() +
+labs(x = "Year", y = "Number of papers", title = "1824 - 1900")
+
+# Plot for 1672 - 1824
+ggplot(data_1672_1824, aes(x=year)) +
+  geom_bar(fill = "violet") +
+  theme_minimal() +
+labs(x = "Year", y = "Number of papers", title = "1672 - 1824")
+
+# Define the intervals
+intervals <- list(
+  c(2020, 2024),
+  c(2015, 2019),
+  c(2010, 2014),
+  c(2005, 2009),
+  c(2000, 2004),
+  c(1995, 1999),
+  c(1985, 1994),
+  c(1975, 1984),
+  c(1965, 1974),
+  c(1900, 1964),
+  c(1672, 1899)
+)
+
+# Create a column for each interval
+for (i in seq_along(intervals)) {
+  interval <- intervals[[i]]
+  start <- interval[1]
+  end <- interval[2]
+  column_name <- paste0("pub_interval_", start, "_", end)
+  data[[column_name]] <- ifelse(data$year >= start & data$year <= end, 1, 0)
+}
+
+write.csv(data, "preprocessed_data_Feb_2024.csv", row.names = FALSE)
+
+```
