@@ -43,7 +43,10 @@ This project is conducted by Harshvardhan Singh under the supervision of Charles
 
 For a more comprehensive breakdown of the project's methodology and the novelty of the approach, please refer to the detailed project documentation.
 
-NOTE - The latest files for this research is predominantly stored, shared and managed between the two authors in other platforms (HPC repositories and box folders), the files on gitHub are only to showcase the projects to others. The data files and the SQL queries to retrieve and format the data from OpenAlex database is removed from this repository (to protect our data integrity) and is stored in our personal HPC server repository, and our personal box folder. 
+## NOTE - 
+The latest files for this research is predominantly stored, shared and managed between the two authors in other platforms (HPC repositories and box folders), the files on gitHub are only to showcase the projects to others. The data files and the SQL queries to retrieve and format the data from OpenAlex database is removed from this repository (to protect our data integrity) and is stored in our personal HPC server repository, and our personal box folder. 
+
+## License
 
 Copyright (c) 2024 Harshvardhan Singh
 
