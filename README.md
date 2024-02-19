@@ -26,11 +26,10 @@ The comprehensive dataset includes:
 - **Network Analysis:** Employing 'Networkx' and other Python and R libraries to visualize connections.
 
 ## Installation
-[DO NOT CLONE WITHOUT PRIOR APPROVAL from the AUTHORS]
-Clone this repository and install dependencies:
-git clone https://github.com/Harshvardhan-Singh1/Project-Apollo
-pip install -r requirements.txt
-
+- [DO NOT CLONE WITHOUT PRIOR APPROVAL from the AUTHORS]
+- Clone this repository and install dependencies:
+- git clone https://github.com/Harshvardhan-Singh1/Project-Apollo
+- pip install -r requirements.txt
 
 ## Usage
 Update the `config.py` with your API keys and run the scripts to perform the analysis.
