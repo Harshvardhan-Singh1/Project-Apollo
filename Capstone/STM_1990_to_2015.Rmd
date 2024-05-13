@@ -1,0 +1,2392 @@
+---
+title: "STM_1990_to_2015"
+author: "Harshvardhan Singh, Charles J. Gomez"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r cache=TRUE}
+
+library(stringr)
+library(wordcloud)
+library(tidyr)
+#Read csv file
+data = read.csv("preprocessed_data_Feb_2024.csv")
+data <- subset(data, year >= 1990 & year <= 1994)
+
+citation_data = read.csv("abstracts_citation_counts.csv")
+citation_data <- subset(citation_data, year >= 1990 & year <= 1994)
+
+# Save the original title data for future use
+data$original_concatenated_title_abstract <- data$concatenated_title_abstract
+
+
+#set.seed(123)  
+#sample_size <- 21000  
+#sample_size <- 8000
+#sample_rows <- sample(nrow(data), sample_size)
+#data <- data[sample_rows, ]
+
+```
+
+```{r cache=TRUE}
+
+library('stm')
+
+#pre-processing the titles using textProcessor from the stm package
+processed_text <- textProcessor(data$concatenated_title_abstract, metadata = data) 
+
+# Further prepare the data by removing low-frequency terms
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta)
+docs_text <- out_text$documents
+vocab_text <- out_text$vocab
+meta_text <- out_text$meta
+
+
+#Prepare data
+plotRemoved(processed_text$documents, lower.thresh = seq(1, 200, by = 100))
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta, lower.thresh = 15)
+
+str(out_text$meta)
+
+# Initialize an empty formula string
+prevalence_formula_str <- "~ US + FR + IT + CN + ES + AU + PL + RU + DE + IN + NL + GB + JP + CA + KR + NorthAmerica + Europe + Africa + Asia + Oceania"
+
+# Convert the string to a formula
+prevalence_formula <- as.formula(prevalence_formula_str)
+print(prevalence_formula)
+
+```
+
+```{r cache=TRUE}
+# Run STM model
+Research_topics <- stm(documents = out_text$documents, 
+                             vocab = out_text$vocab, 
+                             K = 35, 
+                             prevalence = prevalence_formula, 
+                             data = out_text$meta, 
+                             init.type = "Spectral",
+                             max.em.its = 1000,
+                             gamma.prior = 'L1')
+
+```
+
+```{r cache=TRUE}
+# Plot the STM model summary
+plot(Research_topics, type = "summary", xlim = c(0, 0.3))
+
+# Print the top 10 labels for each topic
+topic_labels <- labelTopics(Research_topics, n=10)
+print(topic_labels)
+
+# Match the processed documents with the original titles
+matched_titles <- out_text$meta$original_concatenated_title_abstract
+
+# Print top 5 documents for each topic
+top_docs <- findThoughts(Research_topics, texts = matched_titles, n = 5)$docs[[1]]
+print(top_docs)
+
+# Find and plot the key "thoughts" or documents for selected topics
+thoughts6 <- findThoughts(Research_topics, texts = matched_titles, n = 3, topics = 6)$docs[[1]]
+thoughts18 <- findThoughts(Research_topics, texts = matched_titles, n = 3, topics = 18)$docs[[1]]
+par(mfrow = c(1, 2), mar = c(0.5, 0.5, 1, 0.5))
+plotQuote(thoughts6, width = 30, main = "Topic 6")
+plotQuote(thoughts18, width = 30, main = "Topic 18")
+
+# Calculate and plot the correlation between topics
+mod.out.corr <- topicCorr(Research_topics)
+plot(mod.out.corr, cex = 1.5)
+
+
+# For each topic
+for (topic_num in 1:35) {
+  # Plot the word cloud
+  cloud(Research_topics, topic = topic_num, scale = c(2, 0.25))
+  Sys.sleep(2)
+}
+
+```
+
+```{r cache=TRUE}
+
+topic_proportions <- Research_topics$theta
+
+# 'data' has a unique identifier for each document (doc_id)
+data$doc_id <- 1:nrow(data)
+
+# Convert the topic proportions to a dataframe or matrix where rows correspond to documents
+# and columns to topics, if it's not already in that format.
+# and each column is a topic.
+
+# Now, convert this matrix/dataframe to a long format
+library(tidyr)
+library(dplyr) 
+topic_proportions_long <- as.data.frame(topic_proportions) %>%
+  mutate(doc_id = row.names(.)) %>%
+  pivot_longer(cols = -doc_id, names_to = "topic", values_to = "proportion")
+
+data <- merge(data, topic_proportions_long, by = "doc_id")
+
+# Arrange the data by doc_id ascending and proportion descending
+data <- data %>%
+  arrange(doc_id, desc(proportion))
+
+```
+
+```{r cache=TRUE}
+
+# Select only the necessary columns from citation_data
+citation_data_selected <- citation_data[, c("concept_id", "work_id", "title", "abstract", "total_filtered_citations", "Deflated_Citations", "citations_percentage", "deflated_citations_percentage")]
+
+# Merge the selected citation data with the main dataset
+data <- merge(data, citation_data_selected, by = c("concept_id", "work_id", "title", "abstract"), all.x = TRUE)
+
+
+# Weight the Topic Proportions by Citations
+data$weighted_citation_proportion <- data$proportion * data$total_filtered_citations
+
+# Percentage of the Topic Proportions by Citations
+total_sum_citation <- sum(data$weighted_citation_proportion, na.rm = TRUE)
+data$percentage_citation_proportion <- (data$weighted_citation_proportion / total_sum_citation) * 100
+
+
+
+# Weight the Topic Proportions by Deflated Citations
+data$weighted_deflated_citation_proportion <- data$proportion * data$Deflated_Citations
+
+# Percentage of the Topic Proportions by Deflated Citations
+total_sum <- sum(data$weighted_deflated_citation_proportion, na.rm = TRUE)
+data$percentage_deflated_citation_proportion <- (data$weighted_deflated_citation_proportion / total_sum) * 100
+
+
+summarized_data <- data %>%
+  group_by(topic) %>%
+  summarise(
+    total_weighted_citation_proportion = sum(weighted_deflated_citation_proportion, na.rm = TRUE),
+    average_weighted_citation_proportion = mean(weighted_deflated_citation_proportion, na.rm = TRUE),
+    total_document_proportion = sum(proportion, na.rm = TRUE),
+    average_document_proportion = mean(proportion, na.rm = TRUE)
+    # Uncomment and edit the following lines to include sums for US and GB if needed
+    # US_sum = sum(US, na.rm = TRUE),
+    # GB_sum = sum(GB, na.rm = TRUE),
+  ) %>%
+  mutate(
+    percent_weighted_citation_proportion = total_weighted_citation_proportion / sum(total_weighted_citation_proportion),
+    percent_total_document_proportion = total_document_proportion / sum(total_document_proportion)
+  )
+
+
+
+
+# View the summarized data
+print(summarized_data)
+
+summarized_data %>%
+     select(percent_weighted_citation_proportion, percent_total_document_proportion) %>%
+     cor()
+```
+
+```{r cache=TRUE}
+
+# Estimate the effects of covariates on topic prevalence
+prevalence_estimates <- estimateEffect(formula = prevalence_formula, 
+                                       stm = Research_topics, 
+                                       metadata = out_text$meta)
+
+# Summary of estimates
+summary(prevalence_estimates)
+```
+
+```{r cache=TRUE}
+library(stminsights)
+
+# Variables list from the formula
+variables <- c("US", "FR", "IT", "CN", "ES", "AU", "PL", "RU", "DE", "IN", "NL", "GB", "JP", "CA", "KR", 
+               "NorthAmerica", "Europe", "Africa", "Asia", "Oceania")
+
+# Loop through variables and get effects
+all_effects <- lapply(variables, function(var) {
+  get_effects(estimates = prevalence_estimates, 
+              variable = var, 
+              type = 'pointestimate')
+})
+
+# Combine all effects into one data frame
+all_effects_df <- do.call(rbind, all_effects)
+
+all_effects_df <- data.frame(STM_time_period = rep("1990-1994", nrow(all_effects_df)), all_effects_df)
+all_effects_df <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(all_effects_df)), all_effects_df)
+all_effects_df_1 <- all_effects_df
+
+library(dplyr)
+library(stringr)
+
+# Capture the summary output of the linear model
+summary_output <- capture.output(summary(prevalence_estimates))
+lines <- unlist(strsplit(summary_output, "\n"))
+final_df <- data.frame(Covariate = character(), Estimate = character(), Std.Error = character(),
+                       t.value = character(), Pr = character(), Signif = character(),
+                       Topic = integer(), stringsAsFactors = FALSE)
+
+# Function to get significance level, directly handling strings with "<"
+get_signif <- function(p_value) {
+  if (is.na(p_value)) return("NA") # Handle NA values
+  if (grepl("<", p_value)) return("***") # Assume all "<" values indicate significance at the highest level
+  num_p_value <- as.numeric(p_value) # Convert to numeric, assuming it's already a clean numeric string
+  if (is.na(num_p_value)) return(" ") # If conversion fails, return blank
+  if (num_p_value < 0.001) return("***")
+  if (num_p_value < 0.01) return("**")
+  if (num_p_value < 0.05) return("*")
+  if (num_p_value < 0.1) return(".")
+  return(" ")
+}
+
+# Initialize current topic number
+current_topic <- NA
+
+# Iterate over the lines to extract coefficients
+for (i in seq_along(lines)) {
+  if (grepl("^Topic [0-9]+:", lines[i])) {
+    current_topic <- as.numeric(gsub("Topic ([0-9]+):", "\\1", lines[i]))
+  } else if (!is.na(current_topic) && grepl("^\\s*[A-Za-z0-9()]+\\s+", lines[i])) {
+    parts <- strcapture("^\\s*([A-Za-z0-9()]+)\\s+([-0-9.eE+]+)\\s+([-0-9.eE+]+)\\s+([-0-9.eE+]+)\\s+([<0-9.eE-]+)", lines[i], proto=list(Covariate="", Estimate=NA_character_, Std.Error=NA_character_, t.value=NA_character_, Pr=""))
+    if (!is.na(parts$Estimate)) {  # Ensure that we successfully captured numeric data
+      new_row <- data.frame(Covariate = parts$Covariate,
+                            Estimate = format(as.numeric(parts$Estimate), scientific = TRUE),
+                            Std.Error = parts$Std.Error,
+                            t.value = parts$t.value,
+                            Pr = parts$Pr,
+                            Signif = get_signif(parts$Pr),
+                            Topic = current_topic,
+                            stringsAsFactors = FALSE)
+      final_df <- rbind(final_df, new_row)
+    }
+  }
+}
+
+# Print the final data frame
+print(final_df)
+
+
+#write.csv(results_df, file = "Topic_Covariate_Effects.csv", row.names = FALSE)
+
+
+```
+ 
+```{r cache=TRUE}
+# Print the top 10 labels for each topic
+topic_labels <- labelTopics(Research_topics, n=15)
+print(topic_labels)
+```
+```{r cache=TRUE}
+
+# Calculate the publication count for each country
+country_columns <- c("US", "FR", "IT", "CN", "ES", "AU", "PL", "RU", "DE", 
+                     "IN", "NL", "GB", "JP", "CA", "KR", "NorthAmerica", 
+                     "SouthAmerica", "Europe", "Africa", "Asia", "Oceania")
+
+# Calculate the number of non-zero entries for each country
+publications_count <- sapply(country_columns, function(country) sum(data[[country]] > 0))
+
+# Check the counts
+print(publications_count)
+
+# Create a named vector where names are the country columns
+names(publications_count) <- country_columns
+
+# Match the country counts with the 'Covariates' in 'final_df'
+# and replicate the counts for each country across its multiple occurrences
+final_df$publications_count <- publications_count[match(final_df$Covariate, names(publications_count))]
+
+```
+```{r cache=TRUE}
+# Calculate the sum of citation counts for each country
+citation_counts <- sapply(country_columns, function(country) {
+  sum(data[data[[country]] > 0, "total_filtered_citations"], na.rm = TRUE)
+})
+
+# Create a named vector where names are the country columns
+names(citation_counts) <- country_columns
+
+# Add the citation counts as a new column in 'final_df'
+final_df$citation_count <- citation_counts[match(final_df$Covariate, names(citation_counts))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0.
+final_df$citation_count[is.na(final_df$citation_count)] <- 0
+
+
+
+# Calculate the total sum of citation counts for normalization
+total_citations <- sum(citation_counts)
+
+# Calculate the citation percentage for each country
+citation_percentage <- citation_counts / total_citations
+
+# Add the citation percentage as a new column in 'final_df'
+final_df$citation_percentage <- citation_percentage[match(final_df$Covariate, names(citation_percentage))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0.
+final_df$citation_percentage[is.na(final_df$citation_percentage)] <- 0
+
+
+# Calculate the sum of deflated citation counts for each country
+deflated_citation_counts <- sapply(country_columns, function(country) {
+  sum(data[data[[country]] > 0, "Deflated_Citations"], na.rm = TRUE)
+})
+
+# Create a named vector where names are the country columns for deflated citation counts
+names(deflated_citation_counts) <- country_columns
+
+# Add the deflated citation counts as a new column in 'final_df'
+final_df$deflated_citation_count <- deflated_citation_counts[match(final_df$Covariate, names(deflated_citation_counts))]
+
+# Calculate the total sum of deflated citation counts for normalization
+total_deflated_citations <- sum(deflated_citation_counts)
+
+# Calculate the deflated citation percentage for each country
+deflated_citation_percentage <- deflated_citation_counts / total_deflated_citations
+
+# Add the deflated citation percentage as a new column in 'final_df'
+final_df$deflated_citation_percentage <- deflated_citation_percentage[match(final_df$Covariate, names(deflated_citation_percentage))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0 for both new columns.
+final_df$deflated_citation_count[is.na(final_df$deflated_citation_count)] <- 0
+final_df$deflated_citation_percentage[is.na(final_df$deflated_citation_percentage)] <- 0
+
+```
+
+```{r cache=TRUE}
+final_df <- data.frame(STM_time_period = rep("1990-1994", nrow(final_df)), final_df)
+final_df <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(final_df)), final_df)
+final_df <- final_df[final_df$Covariate != "Signif.", ]
+country_df_1 <- final_df
+
+data <- data.frame(STM_time_period = rep("1990-1994", nrow(data)), data)
+data <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(data)), data)
+# Calculate the prevelance across all topics
+data <- data %>%
+  group_by(topic) %>%
+  mutate(
+    total_proportion_by_topic = sum(proportion),
+    topic_prevalence_percentage = (proportion / total_proportion_by_topic) * 100
+  ) %>%
+  ungroup()
+# Join summarized_data on data
+data <- data %>%
+  left_join(summarized_data, by = "topic")
+
+write.csv(data, file = "topics_1990_1994.csv", row.names = FALSE)
+
+summarized_data_2 = data[, 34:45]
+
+summarized_data_2 <- summarized_data_2 %>%
+  group_by(topic) %>%
+  summarise(
+    sum_proportion = sum(proportion, na.rm = TRUE),
+    avg_proportion = mean(proportion, na.rm = TRUE),
+    sum_total_filtered_citations = sum(total_filtered_citations, na.rm = TRUE),
+    avg_total_filtered_citations = mean(total_filtered_citations, na.rm = TRUE),
+    sum_Deflated_Citations = sum(Deflated_Citations, na.rm = TRUE),
+    avg_Deflated_Citations = mean(Deflated_Citations, na.rm = TRUE),
+    sum_citations_percentage = sum(citations_percentage, na.rm = TRUE),
+    avg_citations_percentage = mean(citations_percentage, na.rm = TRUE),
+    sum_deflated_citations_percentage = sum(deflated_citations_percentage, na.rm = TRUE),
+    avg_deflated_citations_percentage = mean(deflated_citations_percentage, na.rm = TRUE),
+    sum_weighted_citation_proportion = sum(weighted_citation_proportion, na.rm = TRUE),
+    avg_weighted_citation_proportion = mean(weighted_citation_proportion, na.rm = TRUE),
+    sum_percentage_citation_proportion = sum(percentage_citation_proportion, na.rm = TRUE),
+    avg_percentage_citation_proportion = mean(percentage_citation_proportion, na.rm = TRUE),
+    sum_weighted_deflated_citation_proportion = sum(weighted_deflated_citation_proportion, na.rm = TRUE),
+    avg_weighted_deflated_citation_proportion = mean(weighted_deflated_citation_proportion, na.rm = TRUE),
+    sum_percentage_deflated_citation_proportion = sum(percentage_deflated_citation_proportion, na.rm = TRUE),
+    avg_percentage_deflated_citation_proportion = mean(percentage_deflated_citation_proportion, na.rm = TRUE),
+    sum_total_proportion_by_topic = sum(total_proportion_by_topic, na.rm = TRUE),
+    avg_total_proportion_by_topic = mean(total_proportion_by_topic, na.rm = TRUE),
+    sum_topic_prevalence_percentage = sum(topic_prevalence_percentage, na.rm = TRUE),
+    avg_topic_prevalence_percentage = mean(topic_prevalence_percentage, na.rm = TRUE)
+  )
+
+# Merge dataframes by 'topic'
+merged_data_1 <- merge(summarized_data_2, summarized_data, by = "topic", all = TRUE)
+
+```
+```{r cache=TRUE}
+coauthorship_df = read.csv("INPUT_SQL_Coauthorships_Astronomy_and_Astrophysics.csv")
+ROR_df = read.csv("INPUT_ROR_Metadata.csv")
+colnames(coauthorship_df)
+colnames(ROR_df)
+
+ROR_df <- ROR_df %>%
+  rename(work_id = id)
+
+
+coauthorship_df <- coauthorship_df %>%
+  left_join(ROR_df %>% select(work_id, name, types), by = "work_id")
+
+# check columns to ensure the join went as expected
+print(colnames(coauthorship_df))
+
+# Continue with counting co-authors if needed
+coauthorship_summary <- coauthorship_df %>%
+  group_by(work_id) %>%
+  count(country_code) %>%
+  rename(coauthor_count = n)
+
+# Calculate the proportion of co-authors from each country per work
+coauthor_proportions <- coauthorship_summary %>%
+  group_by(work_id) %>%
+  mutate(total_coauthors = sum(coauthor_count),
+         coauthor_percentage = coauthor_count / total_coauthors) %>% #dividing the coauthor_count for each country by the total number of co-authors (total_coauthors) for that particular work_id
+  select(-total_coauthors)
+
+
+print(coauthor_proportions)
+
+# Merge 'data' with 'coauthor_proportions' on work_id
+coauthorship_data_df <- merge(coauthor_proportions, data[, c("work_id", "topic", "proportion")], by = "work_id")
+
+# Calculate country contribution percentages for each document
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(work_id) %>%
+  mutate(country_percentage = coauthor_count / sum(coauthor_count)) %>%
+  select(-coauthor_count)  # Dropping coauthor_count to keep country_percentage
+
+# Adding a new column "STM_Model" to the left
+coauthorship_data_df <- data.frame(STM_model = rep("STM1", nrow(coauthorship_data_df)), coauthorship_data_df)
+
+# Multiply country coauthor percentages by topic weights
+coauthorship_data_df <- coauthorship_data_df %>%
+  mutate(coauthor_topic_load = country_percentage * proportion) %>%
+  select(-country_percentage, -proportion)  # Dropping country_percentage and proportion
+
+# Aggregate by STM model, topic, and country, summing the coauthor-topic loads
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(STM_model, topic, country_code) %>%
+  summarise(coauthor_topic_load_sum = sum(coauthor_topic_load), .groups = "drop")
+
+# Convert the coauthor-topic loads to percentages by model and topic
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(STM_model, topic) %>%
+  mutate(coauthor_topic_load_percentage = coauthor_topic_load_sum / sum(coauthor_topic_load_sum)) %>%
+  select(-coauthor_topic_load_sum)  # Dropping coauthor_topic_load_sum
+
+
+coauthorship_data_df_1 <- coauthorship_data_df
+
+
+
+
+```
+
+```{r cache=TRUE}
+
+library(stringr)
+library(wordcloud)
+library(tidyr)
+#Read csv file
+data = read.csv("preprocessed_data_Feb_2024.csv")
+data <- subset(data, year >= 1995 & year <= 1999)
+
+citation_data = read.csv("abstracts_citation_counts.csv")
+citation_data <- subset(citation_data, year >= 1995 & year <= 1999)
+
+# Save the original title data for future use
+data$original_concatenated_title_abstract <- data$concatenated_title_abstract
+
+
+#set.seed(123)  
+#sample_size <- 21000  
+#sample_size <- 8000
+#sample_rows <- sample(nrow(data), sample_size)
+#data <- data[sample_rows, ]
+
+```
+
+```{r cache=TRUE}
+
+library('stm')
+
+#pre-processing the titles using textProcessor from the stm package
+processed_text <- textProcessor(data$concatenated_title_abstract, metadata = data) 
+
+# Further prepare the data by removing low-frequency terms
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta)
+docs_text <- out_text$documents
+vocab_text <- out_text$vocab
+meta_text <- out_text$meta
+
+
+#Prepare data
+plotRemoved(processed_text$documents, lower.thresh = seq(1, 200, by = 100))
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta, lower.thresh = 15)
+
+str(out_text$meta)
+
+# Initialize an empty formula string
+prevalence_formula_str <- "~ US + FR + IT + CN + ES + AU + PL + RU + DE + IN + NL + GB + JP + CA + KR + NorthAmerica + Europe + Africa + Asia + Oceania"
+
+# Convert the string to a formula
+prevalence_formula <- as.formula(prevalence_formula_str)
+print(prevalence_formula)
+
+```
+
+```{r cache=TRUE}
+# Run STM model
+Research_topics <- stm(documents = out_text$documents, 
+                             vocab = out_text$vocab, 
+                             K = 35, 
+                             prevalence = prevalence_formula, 
+                             data = out_text$meta, 
+                             init.type = "Spectral",
+                             max.em.its = 1000,
+                             gamma.prior = 'L1')
+
+```
+
+```{r cache=TRUE}
+# Plot the STM model summary
+plot(Research_topics, type = "summary", xlim = c(0, 0.3))
+
+# Print the top 10 labels for each topic
+topic_labels <- labelTopics(Research_topics, n=10)
+print(topic_labels)
+
+# Match the processed documents with the original titles
+matched_titles <- out_text$meta$original_concatenated_title_abstract
+
+# Print top 5 documents for each topic
+top_docs <- findThoughts(Research_topics, texts = matched_titles, n = 5)$docs[[1]]
+print(top_docs)
+
+# Find and plot the key "thoughts" or documents for selected topics
+thoughts6 <- findThoughts(Research_topics, texts = matched_titles, n = 3, topics = 6)$docs[[1]]
+thoughts18 <- findThoughts(Research_topics, texts = matched_titles, n = 3, topics = 18)$docs[[1]]
+par(mfrow = c(1, 2), mar = c(0.5, 0.5, 1, 0.5))
+plotQuote(thoughts6, width = 30, main = "Topic 6")
+plotQuote(thoughts18, width = 30, main = "Topic 18")
+
+# Calculate and plot the correlation between topics
+mod.out.corr <- topicCorr(Research_topics)
+plot(mod.out.corr, cex = 1.5)
+
+
+# For each topic
+for (topic_num in 1:35) {
+  # Plot the word cloud
+  cloud(Research_topics, topic = topic_num, scale = c(2, 0.25))
+  Sys.sleep(2)
+}
+
+```
+
+```{r cache=TRUE}
+
+topic_proportions <- Research_topics$theta
+
+# 'data' has a unique identifier for each document (doc_id)
+data$doc_id <- 1:nrow(data)
+
+# Convert the topic proportions to a dataframe or matrix where rows correspond to documents
+# and columns to topics, if it's not already in that format.
+# and each column is a topic.
+
+# Now, convert this matrix/dataframe to a long format
+library(tidyr)
+topic_proportions_long <- as.data.frame(topic_proportions) %>%
+  mutate(doc_id = row.names(.)) %>%
+  pivot_longer(cols = -doc_id, names_to = "topic", values_to = "proportion")
+
+data <- merge(data, topic_proportions_long, by = "doc_id")
+
+# Arrange the data by doc_id ascending and proportion descending
+data <- data %>%
+  arrange(doc_id, desc(proportion))
+
+```
+
+```{r cache=TRUE}
+
+# Select only the necessary columns from citation_data
+citation_data_selected <- citation_data[, c("concept_id", "work_id", "title", "abstract", "total_filtered_citations", "Deflated_Citations", "citations_percentage", "deflated_citations_percentage")]
+
+# Merge the selected citation data with the main dataset
+data <- merge(data, citation_data_selected, by = c("concept_id", "work_id", "title", "abstract"), all.x = TRUE)
+
+
+# Weight the Topic Proportions by Citations
+data$weighted_citation_proportion <- data$proportion * data$total_filtered_citations
+
+# Percentage of the Topic Proportions by Citations
+total_sum_citation <- sum(data$weighted_citation_proportion, na.rm = TRUE)
+data$percentage_citation_proportion <- (data$weighted_citation_proportion / total_sum_citation) * 100
+
+
+
+# Weight the Topic Proportions by Deflated Citations
+data$weighted_deflated_citation_proportion <- data$proportion * data$Deflated_Citations
+
+# Percentage of the Topic Proportions by Deflated Citations
+total_sum <- sum(data$weighted_deflated_citation_proportion, na.rm = TRUE)
+data$percentage_deflated_citation_proportion <- (data$weighted_deflated_citation_proportion / total_sum) * 100
+
+
+summarized_data <- data %>%
+  group_by(topic) %>%
+  summarise(
+    total_weighted_citation_proportion = sum(weighted_deflated_citation_proportion, na.rm = TRUE),
+    average_weighted_citation_proportion = mean(weighted_deflated_citation_proportion, na.rm = TRUE),
+    total_document_proportion = sum(proportion, na.rm = TRUE),
+    average_document_proportion = mean(proportion, na.rm = TRUE)
+    # Uncomment and edit the following lines to include sums for US and GB if needed
+    # US_sum = sum(US, na.rm = TRUE),
+    # GB_sum = sum(GB, na.rm = TRUE),
+  ) %>%
+  mutate(
+    percent_weighted_citation_proportion = total_weighted_citation_proportion / sum(total_weighted_citation_proportion),
+    percent_total_document_proportion = total_document_proportion / sum(total_document_proportion)
+  )
+
+
+
+
+# View the summarized data
+print(summarized_data)
+
+summarized_data %>%
+     select(percent_weighted_citation_proportion, percent_total_document_proportion) %>%
+     cor()
+```
+
+```{r cache=TRUE}
+
+# Estimate the effects of covariates on topic prevalence
+prevalence_estimates <- estimateEffect(formula = prevalence_formula, 
+                                       stm = Research_topics, 
+                                       metadata = out_text$meta)
+
+# Summary of estimates
+summary(prevalence_estimates)
+
+```
+
+```{r cache=TRUE}
+library(stminsights)
+
+# Variables list from the formula
+variables <- c("US", "FR", "IT", "CN", "ES", "AU", "PL", "RU", "DE", "IN", "NL", "GB", "JP", "CA", "KR", 
+               "NorthAmerica", "Europe", "Africa", "Asia", "Oceania")
+
+# Loop through variables and get effects
+all_effects <- lapply(variables, function(var) {
+  get_effects(estimates = prevalence_estimates, 
+              variable = var, 
+              type = 'pointestimate')
+})
+
+# Combine all effects into one data frame
+all_effects_df <- do.call(rbind, all_effects)
+
+all_effects_df <- data.frame(STM_time_period = rep("1990-1994", nrow(all_effects_df)), all_effects_df)
+all_effects_df <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(all_effects_df)), all_effects_df)
+all_effects_df_2 <- all_effects_df
+
+library(dplyr)
+library(stringr)
+
+# Capture the summary output of the linear model
+summary_output <- capture.output(summary(prevalence_estimates))
+lines <- unlist(strsplit(summary_output, "\n"))
+final_df <- data.frame(Covariate = character(), Estimate = character(), Std.Error = character(),
+                       t.value = character(), Pr = character(), Signif = character(),
+                       Topic = integer(), stringsAsFactors = FALSE)
+
+# Function to get significance level, directly handling strings with "<"
+get_signif <- function(p_value) {
+  if (is.na(p_value)) return("NA") # Handle NA values
+  if (grepl("<", p_value)) return("***") # Assume all "<" values indicate significance at the highest level
+  num_p_value <- as.numeric(p_value) # Convert to numeric, assuming it's already a clean numeric string
+  if (is.na(num_p_value)) return(" ") # If conversion fails, return blank
+  if (num_p_value < 0.001) return("***")
+  if (num_p_value < 0.01) return("**")
+  if (num_p_value < 0.05) return("*")
+  if (num_p_value < 0.1) return(".")
+  return(" ")
+}
+
+# Initialize current topic number
+current_topic <- NA
+
+# Iterate over the lines to extract coefficients
+for (i in seq_along(lines)) {
+  if (grepl("^Topic [0-9]+:", lines[i])) {
+    current_topic <- as.numeric(gsub("Topic ([0-9]+):", "\\1", lines[i]))
+  } else if (!is.na(current_topic) && grepl("^\\s*[A-Za-z0-9()]+\\s+", lines[i])) {
+    parts <- strcapture("^\\s*([A-Za-z0-9()]+)\\s+([-0-9.eE+]+)\\s+([-0-9.eE+]+)\\s+([-0-9.eE+]+)\\s+([<0-9.eE-]+)", lines[i], proto=list(Covariate="", Estimate=NA_character_, Std.Error=NA_character_, t.value=NA_character_, Pr=""))
+    if (!is.na(parts$Estimate)) {  # Ensure that we successfully captured numeric data
+      new_row <- data.frame(Covariate = parts$Covariate,
+                            Estimate = format(as.numeric(parts$Estimate), scientific = TRUE),
+                            Std.Error = parts$Std.Error,
+                            t.value = parts$t.value,
+                            Pr = parts$Pr,
+                            Signif = get_signif(parts$Pr),
+                            Topic = current_topic,
+                            stringsAsFactors = FALSE)
+      final_df <- rbind(final_df, new_row)
+    }
+  }
+}
+
+# Print the final data frame
+print(final_df)
+
+
+#write.csv(results_df, file = "Topic_Covariate_Effects.csv", row.names = FALSE)
+
+
+```
+ 
+```{r cache=TRUE}
+# Print the top 10 labels for each topic
+topic_labels <- labelTopics(Research_topics, n=15)
+print(topic_labels)
+```
+```{r cache=TRUE}
+
+# Calculate the publication count for each country
+country_columns <- c("US", "FR", "IT", "CN", "ES", "AU", "PL", "RU", "DE", 
+                     "IN", "NL", "GB", "JP", "CA", "KR", "NorthAmerica", 
+                     "SouthAmerica", "Europe", "Africa", "Asia", "Oceania")
+
+# Calculate the number of non-zero entries for each country
+publications_count <- sapply(country_columns, function(country) sum(data[[country]] > 0))
+
+# Check the counts
+print(publications_count)
+
+# Create a named vector where names are the country columns
+names(publications_count) <- country_columns
+
+# Match the country counts with the 'Covariates' in 'final_df'
+# and replicate the counts for each country across its multiple occurrences
+final_df$publications_count <- publications_count[match(final_df$Covariate, names(publications_count))]
+
+```
+```{r cache=TRUE}
+# Calculate the sum of citation counts for each country
+citation_counts <- sapply(country_columns, function(country) {
+  sum(data[data[[country]] > 0, "total_filtered_citations"], na.rm = TRUE)
+})
+
+# Create a named vector where names are the country columns
+names(citation_counts) <- country_columns
+
+# Add the citation counts as a new column in 'final_df'
+final_df$citation_count <- citation_counts[match(final_df$Covariate, names(citation_counts))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0.
+final_df$citation_count[is.na(final_df$citation_count)] <- 0
+
+
+
+# Calculate the total sum of citation counts for normalization
+total_citations <- sum(citation_counts)
+
+# Calculate the citation percentage for each country
+citation_percentage <- citation_counts / total_citations
+
+# Add the citation percentage as a new column in 'final_df'
+final_df$citation_percentage <- citation_percentage[match(final_df$Covariate, names(citation_percentage))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0.
+final_df$citation_percentage[is.na(final_df$citation_percentage)] <- 0
+
+
+# Calculate the sum of deflated citation counts for each country
+deflated_citation_counts <- sapply(country_columns, function(country) {
+  sum(data[data[[country]] > 0, "Deflated_Citations"], na.rm = TRUE)
+})
+
+# Create a named vector where names are the country columns for deflated citation counts
+names(deflated_citation_counts) <- country_columns
+
+# Add the deflated citation counts as a new column in 'final_df'
+final_df$deflated_citation_count <- deflated_citation_counts[match(final_df$Covariate, names(deflated_citation_counts))]
+
+# Calculate the total sum of deflated citation counts for normalization
+total_deflated_citations <- sum(deflated_citation_counts)
+
+# Calculate the deflated citation percentage for each country
+deflated_citation_percentage <- deflated_citation_counts / total_deflated_citations
+
+# Add the deflated citation percentage as a new column in 'final_df'
+final_df$deflated_citation_percentage <- deflated_citation_percentage[match(final_df$Covariate, names(deflated_citation_percentage))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0 for both new columns.
+final_df$deflated_citation_count[is.na(final_df$deflated_citation_count)] <- 0
+final_df$deflated_citation_percentage[is.na(final_df$deflated_citation_percentage)] <- 0
+
+```
+
+```{r cache=TRUE}
+final_df <- data.frame(STM_time_period = rep("1995-1999", nrow(final_df)), final_df)
+final_df <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(final_df)), final_df)
+final_df <- final_df[final_df$Covariate != "Signif.", ]
+country_df_2 <- final_df
+
+data <- data.frame(STM_time_period = rep("1995-1999", nrow(data)), data)
+data <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(data)), data)
+# Calculate the prevelance across all topics
+data <- data %>%
+  group_by(topic) %>%
+  mutate(
+    total_proportion_by_topic = sum(proportion),
+    topic_prevalence_percentage = (proportion / total_proportion_by_topic) * 100
+  ) %>%
+  ungroup()
+# Join summarized_data on data
+data <- data %>%
+  left_join(summarized_data, by = "topic")
+
+write.csv(data, file = "topics_1995_1999.csv", row.names = FALSE)
+
+summarized_data_2 = data[, 34:45]
+
+summarized_data_2 <- summarized_data_2 %>%
+  group_by(topic) %>%
+  summarise(
+    sum_proportion = sum(proportion, na.rm = TRUE),
+    avg_proportion = mean(proportion, na.rm = TRUE),
+    sum_total_filtered_citations = sum(total_filtered_citations, na.rm = TRUE),
+    avg_total_filtered_citations = mean(total_filtered_citations, na.rm = TRUE),
+    sum_Deflated_Citations = sum(Deflated_Citations, na.rm = TRUE),
+    avg_Deflated_Citations = mean(Deflated_Citations, na.rm = TRUE),
+    sum_citations_percentage = sum(citations_percentage, na.rm = TRUE),
+    avg_citations_percentage = mean(citations_percentage, na.rm = TRUE),
+    sum_deflated_citations_percentage = sum(deflated_citations_percentage, na.rm = TRUE),
+    avg_deflated_citations_percentage = mean(deflated_citations_percentage, na.rm = TRUE),
+    sum_weighted_citation_proportion = sum(weighted_citation_proportion, na.rm = TRUE),
+    avg_weighted_citation_proportion = mean(weighted_citation_proportion, na.rm = TRUE),
+    sum_percentage_citation_proportion = sum(percentage_citation_proportion, na.rm = TRUE),
+    avg_percentage_citation_proportion = mean(percentage_citation_proportion, na.rm = TRUE),
+    sum_weighted_deflated_citation_proportion = sum(weighted_deflated_citation_proportion, na.rm = TRUE),
+    avg_weighted_deflated_citation_proportion = mean(weighted_deflated_citation_proportion, na.rm = TRUE),
+    sum_percentage_deflated_citation_proportion = sum(percentage_deflated_citation_proportion, na.rm = TRUE),
+    avg_percentage_deflated_citation_proportion = mean(percentage_deflated_citation_proportion, na.rm = TRUE),
+    sum_total_proportion_by_topic = sum(total_proportion_by_topic, na.rm = TRUE),
+    avg_total_proportion_by_topic = mean(total_proportion_by_topic, na.rm = TRUE),
+    sum_topic_prevalence_percentage = sum(topic_prevalence_percentage, na.rm = TRUE),
+    avg_topic_prevalence_percentage = mean(topic_prevalence_percentage, na.rm = TRUE)
+  )
+
+# Merge dataframes by 'topic'
+merged_data_2 <- merge(summarized_data_2, summarized_data, by = "topic", all = TRUE)
+
+
+```
+
+```{r cache=TRUE}
+coauthorship_df = read.csv("INPUT_SQL_Coauthorships_Astronomy_and_Astrophysics.csv")
+ROR_df = read.csv("INPUT_ROR_Metadata.csv")
+colnames(coauthorship_df)
+colnames(ROR_df)
+
+ROR_df <- ROR_df %>%
+  rename(work_id = id)
+
+
+coauthorship_df <- coauthorship_df %>%
+  left_join(ROR_df %>% select(work_id, name, types), by = "work_id")
+
+# check columns to ensure the join went as expected
+print(colnames(coauthorship_df))
+
+# Continue with counting co-authors if needed
+coauthorship_summary <- coauthorship_df %>%
+  group_by(work_id) %>%
+  count(country_code) %>%
+  rename(coauthor_count = n)
+
+# Calculate the proportion of co-authors from each country per work
+coauthor_proportions <- coauthorship_summary %>%
+  group_by(work_id) %>%
+  mutate(total_coauthors = sum(coauthor_count),
+         coauthor_percentage = coauthor_count / total_coauthors) %>% #dividing the coauthor_count for each country by the total number of co-authors (total_coauthors) for that particular work_id
+  select(-total_coauthors)
+
+
+print(coauthor_proportions)
+
+# Merge 'data' with 'coauthor_proportions' on work_id
+coauthorship_data_df <- merge(coauthor_proportions, data[, c("work_id", "topic", "proportion")], by = "work_id")
+
+# Calculate country contribution percentages for each document
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(work_id) %>%
+  mutate(country_percentage = coauthor_count / sum(coauthor_count)) %>%
+  select(-coauthor_count)  # Dropping coauthor_count to keep country_percentage
+
+# Adding a new column "STM_Model" to the left
+coauthorship_data_df <- data.frame(STM_model = rep("STM2", nrow(coauthorship_data_df)), coauthorship_data_df)
+
+# Multiply country coauthor percentages by topic weights
+coauthorship_data_df <- coauthorship_data_df %>%
+  mutate(coauthor_topic_load = country_percentage * proportion) %>%
+  select(-country_percentage, -proportion)  # Dropping country_percentage and proportion
+
+# Aggregate by STM model, topic, and country, summing the coauthor-topic loads
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(STM_model, topic, country_code) %>%
+  summarise(coauthor_topic_load_sum = sum(coauthor_topic_load), .groups = "drop")
+
+# Convert the coauthor-topic loads to percentages by model and topic
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(STM_model, topic) %>%
+  mutate(coauthor_topic_load_percentage = coauthor_topic_load_sum / sum(coauthor_topic_load_sum)) %>%
+  select(-coauthor_topic_load_sum)  # Dropping coauthor_topic_load_sum
+
+
+coauthorship_data_df_2 <- coauthorship_data_df
+
+
+
+
+```
+
+```{r cache=TRUE}
+
+library(stringr)
+library(wordcloud)
+library(tidyr)
+#Read csv file
+data = read.csv("preprocessed_data_Feb_2024.csv")
+data <- subset(data, year >= 2000 & year <= 2004)
+
+citation_data = read.csv("abstracts_citation_counts.csv")
+citation_data <- subset(citation_data, year >= 2000 & year <= 2004)
+
+# Save the original title data for future use
+data$original_concatenated_title_abstract <- data$concatenated_title_abstract
+
+
+#set.seed(123)  
+#sample_size <- 21000  
+#sample_size <- 8000
+#sample_rows <- sample(nrow(data), sample_size)
+#data <- data[sample_rows, ]
+
+```
+
+```{r cache=TRUE}
+
+library('stm')
+
+#pre-processing the titles using textProcessor from the stm package
+processed_text <- textProcessor(data$concatenated_title_abstract, metadata = data) 
+
+# Further prepare the data by removing low-frequency terms
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta)
+docs_text <- out_text$documents
+vocab_text <- out_text$vocab
+meta_text <- out_text$meta
+
+
+#Prepare data
+plotRemoved(processed_text$documents, lower.thresh = seq(1, 200, by = 100))
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta, lower.thresh = 15)
+
+str(out_text$meta)
+
+# Initialize an empty formula string
+prevalence_formula_str <- "~ US + FR + IT + CN + ES + AU + PL + RU + DE + IN + NL + GB + JP + CA + KR + NorthAmerica + Europe + Africa + Asia + Oceania"
+
+# Convert the string to a formula
+prevalence_formula <- as.formula(prevalence_formula_str)
+print(prevalence_formula)
+
+```
+
+```{r cache=TRUE}
+# Run STM model
+Research_topics <- stm(documents = out_text$documents, 
+                             vocab = out_text$vocab, 
+                             K = 35, 
+                             prevalence = prevalence_formula, 
+                             data = out_text$meta, 
+                             init.type = "Spectral",
+                             max.em.its = 1000,
+                             gamma.prior = 'L1')
+
+```
+
+```{r cache=TRUE}
+# Plot the STM model summary
+plot(Research_topics, type = "summary", xlim = c(0, 0.3))
+
+# Print the top 10 labels for each topic
+topic_labels <- labelTopics(Research_topics, n=10)
+print(topic_labels)
+
+# Match the processed documents with the original titles
+matched_titles <- out_text$meta$original_concatenated_title_abstract
+
+# Print top 5 documents for each topic
+top_docs <- findThoughts(Research_topics, texts = matched_titles, n = 5)$docs[[1]]
+print(top_docs)
+
+# Find and plot the key "thoughts" or documents for selected topics
+thoughts6 <- findThoughts(Research_topics, texts = matched_titles, n = 3, topics = 6)$docs[[1]]
+thoughts18 <- findThoughts(Research_topics, texts = matched_titles, n = 3, topics = 18)$docs[[1]]
+par(mfrow = c(1, 2), mar = c(0.5, 0.5, 1, 0.5))
+plotQuote(thoughts6, width = 30, main = "Topic 6")
+plotQuote(thoughts18, width = 30, main = "Topic 18")
+
+# Calculate and plot the correlation between topics
+mod.out.corr <- topicCorr(Research_topics)
+plot(mod.out.corr, cex = 1.5)
+
+
+# For each topic
+for (topic_num in 1:35) {
+  # Plot the word cloud
+  cloud(Research_topics, topic = topic_num, scale = c(2, 0.25))
+  Sys.sleep(2)
+}
+
+```
+
+```{r cache=TRUE}
+
+topic_proportions <- Research_topics$theta
+
+# 'data' has a unique identifier for each document (doc_id)
+data$doc_id <- 1:nrow(data)
+
+# Convert the topic proportions to a dataframe or matrix where rows correspond to documents
+# and columns to topics, if it's not already in that format.
+# and each column is a topic.
+
+# Now, convert this matrix/dataframe to a long format
+library(tidyr)
+topic_proportions_long <- as.data.frame(topic_proportions) %>%
+  mutate(doc_id = row.names(.)) %>%
+  pivot_longer(cols = -doc_id, names_to = "topic", values_to = "proportion")
+
+data <- merge(data, topic_proportions_long, by = "doc_id")
+
+# Arrange the data by doc_id ascending and proportion descending
+data <- data %>%
+  arrange(doc_id, desc(proportion))
+
+```
+
+```{r cache=TRUE}
+
+
+# Select only the necessary columns from citation_data
+citation_data_selected <- citation_data[, c("concept_id", "work_id", "title", "abstract", "total_filtered_citations", "Deflated_Citations", "citations_percentage", "deflated_citations_percentage")]
+
+# Merge the selected citation data with the main dataset
+data <- merge(data, citation_data_selected, by = c("concept_id", "work_id", "title", "abstract"), all.x = TRUE)
+
+
+# Weight the Topic Proportions by Citations
+data$weighted_citation_proportion <- data$proportion * data$total_filtered_citations
+
+# Percentage of the Topic Proportions by Citations
+total_sum_citation <- sum(data$weighted_citation_proportion, na.rm = TRUE)
+data$percentage_citation_proportion <- (data$weighted_citation_proportion / total_sum_citation) * 100
+
+
+
+# Weight the Topic Proportions by Deflated Citations
+data$weighted_deflated_citation_proportion <- data$proportion * data$Deflated_Citations
+
+# Percentage of the Topic Proportions by Deflated Citations
+total_sum <- sum(data$weighted_deflated_citation_proportion, na.rm = TRUE)
+data$percentage_deflated_citation_proportion <- (data$weighted_deflated_citation_proportion / total_sum) * 100
+
+
+summarized_data <- data %>%
+  group_by(topic) %>%
+  summarise(
+    total_weighted_citation_proportion = sum(weighted_deflated_citation_proportion, na.rm = TRUE),
+    average_weighted_citation_proportion = mean(weighted_deflated_citation_proportion, na.rm = TRUE),
+    total_document_proportion = sum(proportion, na.rm = TRUE),
+    average_document_proportion = mean(proportion, na.rm = TRUE)
+    # Uncomment and edit the following lines to include sums for US and GB if needed
+    # US_sum = sum(US, na.rm = TRUE),
+    # GB_sum = sum(GB, na.rm = TRUE),
+  ) %>%
+  mutate(
+    percent_weighted_citation_proportion = total_weighted_citation_proportion / sum(total_weighted_citation_proportion),
+    percent_total_document_proportion = total_document_proportion / sum(total_document_proportion)
+  )
+
+
+
+
+# View the summarized data
+print(summarized_data)
+
+summarized_data %>%
+     select(percent_weighted_citation_proportion, percent_total_document_proportion) %>%
+     cor()
+```
+
+```{r cache=TRUE}
+
+# Estimate the effects of covariates on topic prevalence
+prevalence_estimates <- estimateEffect(formula = prevalence_formula, 
+                                       stm = Research_topics, 
+                                       metadata = out_text$meta)
+
+# Summary of estimates
+summary(prevalence_estimates)
+
+```
+
+```{r cache=TRUE}
+library(stminsights)
+
+# Variables list from the formula
+variables <- c("US", "FR", "IT", "CN", "ES", "AU", "PL", "RU", "DE", "IN", "NL", "GB", "JP", "CA", "KR", 
+               "NorthAmerica", "Europe", "Africa", "Asia", "Oceania")
+
+# Loop through variables and get effects
+all_effects <- lapply(variables, function(var) {
+  get_effects(estimates = prevalence_estimates, 
+              variable = var, 
+              type = 'pointestimate')
+})
+
+# Combine all effects into one data frame
+all_effects_df <- do.call(rbind, all_effects)
+
+all_effects_df <- data.frame(STM_time_period = rep("1990-1994", nrow(all_effects_df)), all_effects_df)
+all_effects_df <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(all_effects_df)), all_effects_df)
+all_effects_df_3 <- all_effects_df
+
+library(dplyr)
+library(stringr)
+
+# Capture the summary output of the linear model
+summary_output <- capture.output(summary(prevalence_estimates))
+lines <- unlist(strsplit(summary_output, "\n"))
+final_df <- data.frame(Covariate = character(), Estimate = character(), Std.Error = character(),
+                       t.value = character(), Pr = character(), Signif = character(),
+                       Topic = integer(), stringsAsFactors = FALSE)
+
+# Function to get significance level, directly handling strings with "<"
+get_signif <- function(p_value) {
+  if (is.na(p_value)) return("NA") # Handle NA values
+  if (grepl("<", p_value)) return("***") # Assume all "<" values indicate significance at the highest level
+  num_p_value <- as.numeric(p_value) # Convert to numeric, assuming it's already a clean numeric string
+  if (is.na(num_p_value)) return(" ") # If conversion fails, return blank
+  if (num_p_value < 0.001) return("***")
+  if (num_p_value < 0.01) return("**")
+  if (num_p_value < 0.05) return("*")
+  if (num_p_value < 0.1) return(".")
+  return(" ")
+}
+
+# Initialize current topic number
+current_topic <- NA
+
+# Iterate over the lines to extract coefficients
+for (i in seq_along(lines)) {
+  if (grepl("^Topic [0-9]+:", lines[i])) {
+    current_topic <- as.numeric(gsub("Topic ([0-9]+):", "\\1", lines[i]))
+  } else if (!is.na(current_topic) && grepl("^\\s*[A-Za-z0-9()]+\\s+", lines[i])) {
+    parts <- strcapture("^\\s*([A-Za-z0-9()]+)\\s+([-0-9.eE+]+)\\s+([-0-9.eE+]+)\\s+([-0-9.eE+]+)\\s+([<0-9.eE-]+)", lines[i], proto=list(Covariate="", Estimate=NA_character_, Std.Error=NA_character_, t.value=NA_character_, Pr=""))
+    if (!is.na(parts$Estimate)) {  # Ensure that we successfully captured numeric data
+      new_row <- data.frame(Covariate = parts$Covariate,
+                            Estimate = format(as.numeric(parts$Estimate), scientific = TRUE),
+                            Std.Error = parts$Std.Error,
+                            t.value = parts$t.value,
+                            Pr = parts$Pr,
+                            Signif = get_signif(parts$Pr),
+                            Topic = current_topic,
+                            stringsAsFactors = FALSE)
+      final_df <- rbind(final_df, new_row)
+    }
+  }
+}
+
+# Print the final data frame
+print(final_df)
+
+
+#write.csv(results_df, file = "Topic_Covariate_Effects.csv", row.names = FALSE)
+
+
+```
+ 
+```{r cache=TRUE}
+# Print the top 10 labels for each topic
+topic_labels <- labelTopics(Research_topics, n=15)
+print(topic_labels)
+```
+```{r cache=TRUE}
+
+# Calculate the publication count for each country
+country_columns <- c("US", "FR", "IT", "CN", "ES", "AU", "PL", "RU", "DE", 
+                     "IN", "NL", "GB", "JP", "CA", "KR", "NorthAmerica", 
+                     "SouthAmerica", "Europe", "Africa", "Asia", "Oceania")
+
+# Calculate the number of non-zero entries for each country
+publications_count <- sapply(country_columns, function(country) sum(data[[country]] > 0))
+
+# Check the counts
+print(publications_count)
+
+# Create a named vector where names are the country columns
+names(publications_count) <- country_columns
+
+# Match the country counts with the 'Covariates' in 'final_df'
+# and replicate the counts for each country across its multiple occurrences
+final_df$publications_count <- publications_count[match(final_df$Covariate, names(publications_count))]
+
+```
+```{r cache=TRUE}
+# Calculate the sum of citation counts for each country
+citation_counts <- sapply(country_columns, function(country) {
+  sum(data[data[[country]] > 0, "total_filtered_citations"], na.rm = TRUE)
+})
+
+# Create a named vector where names are the country columns
+names(citation_counts) <- country_columns
+
+# Add the citation counts as a new column in 'final_df'
+final_df$citation_count <- citation_counts[match(final_df$Covariate, names(citation_counts))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0.
+final_df$citation_count[is.na(final_df$citation_count)] <- 0
+
+
+
+# Calculate the total sum of citation counts for normalization
+total_citations <- sum(citation_counts)
+
+# Calculate the citation percentage for each country
+citation_percentage <- citation_counts / total_citations
+
+# Add the citation percentage as a new column in 'final_df'
+final_df$citation_percentage <- citation_percentage[match(final_df$Covariate, names(citation_percentage))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0.
+final_df$citation_percentage[is.na(final_df$citation_percentage)] <- 0
+
+
+# Calculate the sum of deflated citation counts for each country
+deflated_citation_counts <- sapply(country_columns, function(country) {
+  sum(data[data[[country]] > 0, "Deflated_Citations"], na.rm = TRUE)
+})
+
+# Create a named vector where names are the country columns for deflated citation counts
+names(deflated_citation_counts) <- country_columns
+
+# Add the deflated citation counts as a new column in 'final_df'
+final_df$deflated_citation_count <- deflated_citation_counts[match(final_df$Covariate, names(deflated_citation_counts))]
+
+# Calculate the total sum of deflated citation counts for normalization
+total_deflated_citations <- sum(deflated_citation_counts)
+
+# Calculate the deflated citation percentage for each country
+deflated_citation_percentage <- deflated_citation_counts / total_deflated_citations
+
+# Add the deflated citation percentage as a new column in 'final_df'
+final_df$deflated_citation_percentage <- deflated_citation_percentage[match(final_df$Covariate, names(deflated_citation_percentage))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0 for both new columns.
+final_df$deflated_citation_count[is.na(final_df$deflated_citation_count)] <- 0
+final_df$deflated_citation_percentage[is.na(final_df$deflated_citation_percentage)] <- 0
+
+```
+
+```{r cache=TRUE}
+final_df <- data.frame(STM_time_period = rep("2000-2004", nrow(final_df)), final_df)
+final_df <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(final_df)), final_df)
+final_df <- final_df[final_df$Covariate != "Signif.", ]
+country_df_3 <- final_df
+
+data <- data.frame(STM_time_period = rep("2000-2004", nrow(data)), data)
+data <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(data)), data)
+# Calculate the prevelance across all topics
+data <- data %>%
+  group_by(topic) %>%
+  mutate(
+    total_proportion_by_topic = sum(proportion),
+    topic_prevalence_percentage = (proportion / total_proportion_by_topic) * 100
+  ) %>%
+  ungroup()
+# Join summarized_data on data
+data <- data %>%
+  left_join(summarized_data, by = "topic")
+
+write.csv(data, file = "topics_2000_2004.csv", row.names = FALSE)
+
+summarized_data_2 = data[, 34:45]
+
+summarized_data_2 <- summarized_data_2 %>%
+  group_by(topic) %>%
+  summarise(
+    sum_proportion = sum(proportion, na.rm = TRUE),
+    avg_proportion = mean(proportion, na.rm = TRUE),
+    sum_total_filtered_citations = sum(total_filtered_citations, na.rm = TRUE),
+    avg_total_filtered_citations = mean(total_filtered_citations, na.rm = TRUE),
+    sum_Deflated_Citations = sum(Deflated_Citations, na.rm = TRUE),
+    avg_Deflated_Citations = mean(Deflated_Citations, na.rm = TRUE),
+    sum_citations_percentage = sum(citations_percentage, na.rm = TRUE),
+    avg_citations_percentage = mean(citations_percentage, na.rm = TRUE),
+    sum_deflated_citations_percentage = sum(deflated_citations_percentage, na.rm = TRUE),
+    avg_deflated_citations_percentage = mean(deflated_citations_percentage, na.rm = TRUE),
+    sum_weighted_citation_proportion = sum(weighted_citation_proportion, na.rm = TRUE),
+    avg_weighted_citation_proportion = mean(weighted_citation_proportion, na.rm = TRUE),
+    sum_percentage_citation_proportion = sum(percentage_citation_proportion, na.rm = TRUE),
+    avg_percentage_citation_proportion = mean(percentage_citation_proportion, na.rm = TRUE),
+    sum_weighted_deflated_citation_proportion = sum(weighted_deflated_citation_proportion, na.rm = TRUE),
+    avg_weighted_deflated_citation_proportion = mean(weighted_deflated_citation_proportion, na.rm = TRUE),
+    sum_percentage_deflated_citation_proportion = sum(percentage_deflated_citation_proportion, na.rm = TRUE),
+    avg_percentage_deflated_citation_proportion = mean(percentage_deflated_citation_proportion, na.rm = TRUE),
+    sum_total_proportion_by_topic = sum(total_proportion_by_topic, na.rm = TRUE),
+    avg_total_proportion_by_topic = mean(total_proportion_by_topic, na.rm = TRUE),
+    sum_topic_prevalence_percentage = sum(topic_prevalence_percentage, na.rm = TRUE),
+    avg_topic_prevalence_percentage = mean(topic_prevalence_percentage, na.rm = TRUE)
+  )
+
+# Merge dataframes by 'topic'
+merged_data_3 <- merge(summarized_data_2, summarized_data, by = "topic", all = TRUE)
+
+
+```
+
+```{r cache=TRUE}
+coauthorship_df = read.csv("INPUT_SQL_Coauthorships_Astronomy_and_Astrophysics.csv")
+ROR_df = read.csv("INPUT_ROR_Metadata.csv")
+colnames(coauthorship_df)
+colnames(ROR_df)
+
+ROR_df <- ROR_df %>%
+  rename(work_id = id)
+
+
+coauthorship_df <- coauthorship_df %>%
+  left_join(ROR_df %>% select(work_id, name, types), by = "work_id")
+
+# check columns to ensure the join went as expected
+print(colnames(coauthorship_df))
+
+# Continue with counting co-authors if needed
+coauthorship_summary <- coauthorship_df %>%
+  group_by(work_id) %>%
+  count(country_code) %>%
+  rename(coauthor_count = n)
+
+# Calculate the proportion of co-authors from each country per work
+coauthor_proportions <- coauthorship_summary %>%
+  group_by(work_id) %>%
+  mutate(total_coauthors = sum(coauthor_count),
+         coauthor_percentage = coauthor_count / total_coauthors) %>% #dividing the coauthor_count for each country by the total number of co-authors (total_coauthors) for that particular work_id
+  select(-total_coauthors)
+
+
+print(coauthor_proportions)
+
+# Merge 'data' with 'coauthor_proportions' on work_id
+coauthorship_data_df <- merge(coauthor_proportions, data[, c("work_id", "topic", "proportion")], by = "work_id")
+
+# Calculate country contribution percentages for each document
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(work_id) %>%
+  mutate(country_percentage = coauthor_count / sum(coauthor_count)) %>%
+  select(-coauthor_count)  # Dropping coauthor_count to keep country_percentage
+
+# Adding a new column "STM_Model" to the left
+coauthorship_data_df <- data.frame(STM_model = rep("STM3", nrow(coauthorship_data_df)), coauthorship_data_df)
+
+# Multiply country coauthor percentages by topic weights
+coauthorship_data_df <- coauthorship_data_df %>%
+  mutate(coauthor_topic_load = country_percentage * proportion) %>%
+  select(-country_percentage, -proportion)  # Dropping country_percentage and proportion
+
+# Aggregate by STM model, topic, and country, summing the coauthor-topic loads
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(STM_model, topic, country_code) %>%
+  summarise(coauthor_topic_load_sum = sum(coauthor_topic_load), .groups = "drop")
+
+# Convert the coauthor-topic loads to percentages by model and topic
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(STM_model, topic) %>%
+  mutate(coauthor_topic_load_percentage = coauthor_topic_load_sum / sum(coauthor_topic_load_sum)) %>%
+  select(-coauthor_topic_load_sum)  # Dropping coauthor_topic_load_sum
+
+
+coauthorship_data_df_3 <- coauthorship_data_df
+
+
+```
+
+```{r cache=TRUE}
+
+library(stringr)
+library(wordcloud)
+library(tidyr)
+#Read csv file
+data = read.csv("preprocessed_data_Feb_2024.csv")
+data <- subset(data, year >= 2005 & year <= 2009)
+
+citation_data = read.csv("abstracts_citation_counts.csv")
+citation_data <- subset(citation_data, year >= 2005 & year <= 2009)
+
+# Save the original title data for future use
+data$original_concatenated_title_abstract <- data$concatenated_title_abstract
+
+
+#set.seed(123)  
+#sample_size <- 21000  
+#sample_size <- 8000
+#sample_rows <- sample(nrow(data), sample_size)
+#data <- data[sample_rows, ]
+
+```
+
+```{r cache=TRUE}
+
+library('stm')
+
+#pre-processing the titles using textProcessor from the stm package
+processed_text <- textProcessor(data$concatenated_title_abstract, metadata = data) 
+
+# Further prepare the data by removing low-frequency terms
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta)
+docs_text <- out_text$documents
+vocab_text <- out_text$vocab
+meta_text <- out_text$meta
+
+
+#Prepare data
+plotRemoved(processed_text$documents, lower.thresh = seq(1, 200, by = 100))
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta, lower.thresh = 15)
+
+str(out_text$meta)
+
+# Initialize an empty formula string
+prevalence_formula_str <- "~ US + FR + IT + CN + ES + AU + PL + RU + DE + IN + NL + GB + JP + CA + KR + NorthAmerica + Europe + Africa + Asia + Oceania"
+
+# Convert the string to a formula
+prevalence_formula <- as.formula(prevalence_formula_str)
+print(prevalence_formula)
+
+```
+
+```{r cache=TRUE}
+# Run STM model
+Research_topics <- stm(documents = out_text$documents, 
+                             vocab = out_text$vocab, 
+                             K = 35, 
+                             prevalence = prevalence_formula, 
+                             data = out_text$meta, 
+                             init.type = "Spectral",
+                             max.em.its = 1000,
+                             gamma.prior = 'L1')
+
+```
+
+```{r cache=TRUE}
+# Plot the STM model summary
+plot(Research_topics, type = "summary", xlim = c(0, 0.3))
+
+# Print the top 10 labels for each topic
+topic_labels <- labelTopics(Research_topics, n=10)
+print(topic_labels)
+
+# Match the processed documents with the original titles
+matched_titles <- out_text$meta$original_concatenated_title_abstract
+
+# Print top 5 documents for each topic
+top_docs <- findThoughts(Research_topics, texts = matched_titles, n = 5)$docs[[1]]
+print(top_docs)
+
+# Find and plot the key "thoughts" or documents for selected topics
+thoughts6 <- findThoughts(Research_topics, texts = matched_titles, n = 3, topics = 6)$docs[[1]]
+thoughts18 <- findThoughts(Research_topics, texts = matched_titles, n = 3, topics = 18)$docs[[1]]
+par(mfrow = c(1, 2), mar = c(0.5, 0.5, 1, 0.5))
+plotQuote(thoughts6, width = 30, main = "Topic 6")
+plotQuote(thoughts18, width = 30, main = "Topic 18")
+
+# Calculate and plot the correlation between topics
+mod.out.corr <- topicCorr(Research_topics)
+plot(mod.out.corr, cex = 1.5)
+
+
+# For each topic
+for (topic_num in 1:35) {
+  # Plot the word cloud
+  cloud(Research_topics, topic = topic_num, scale = c(2, 0.25))
+  Sys.sleep(2)
+}
+
+```
+
+```{r cache=TRUE}
+
+topic_proportions <- Research_topics$theta
+
+# 'data' has a unique identifier for each document (doc_id)
+data$doc_id <- 1:nrow(data)
+
+# Convert the topic proportions to a dataframe or matrix where rows correspond to documents
+# and columns to topics, if it's not already in that format.
+# and each column is a topic.
+
+# Now, convert this matrix/dataframe to a long format
+library(tidyr)
+topic_proportions_long <- as.data.frame(topic_proportions) %>%
+  mutate(doc_id = row.names(.)) %>%
+  pivot_longer(cols = -doc_id, names_to = "topic", values_to = "proportion")
+
+data <- merge(data, topic_proportions_long, by = "doc_id")
+
+# Arrange the data by doc_id ascending and proportion descending
+data <- data %>%
+  arrange(doc_id, desc(proportion))
+
+```
+
+```{r cache=TRUE}
+
+# Select only the necessary columns from citation_data
+citation_data_selected <- citation_data[, c("concept_id", "work_id", "title", "abstract", "total_filtered_citations", "Deflated_Citations", "citations_percentage", "deflated_citations_percentage")]
+
+# Merge the selected citation data with the main dataset
+data <- merge(data, citation_data_selected, by = c("concept_id", "work_id", "title", "abstract"), all.x = TRUE)
+
+
+# Weight the Topic Proportions by Citations
+data$weighted_citation_proportion <- data$proportion * data$total_filtered_citations
+
+# Percentage of the Topic Proportions by Citations
+total_sum_citation <- sum(data$weighted_citation_proportion, na.rm = TRUE)
+data$percentage_citation_proportion <- (data$weighted_citation_proportion / total_sum_citation) * 100
+
+
+
+# Weight the Topic Proportions by Deflated Citations
+data$weighted_deflated_citation_proportion <- data$proportion * data$Deflated_Citations
+
+# Percentage of the Topic Proportions by Deflated Citations
+total_sum <- sum(data$weighted_deflated_citation_proportion, na.rm = TRUE)
+data$percentage_deflated_citation_proportion <- (data$weighted_deflated_citation_proportion / total_sum) * 100
+
+
+summarized_data <- data %>%
+  group_by(topic) %>%
+  summarise(
+    total_weighted_citation_proportion = sum(weighted_deflated_citation_proportion, na.rm = TRUE),
+    average_weighted_citation_proportion = mean(weighted_deflated_citation_proportion, na.rm = TRUE),
+    total_document_proportion = sum(proportion, na.rm = TRUE),
+    average_document_proportion = mean(proportion, na.rm = TRUE)
+    # Uncomment and edit the following lines to include sums for US and GB if needed
+    # US_sum = sum(US, na.rm = TRUE),
+    # GB_sum = sum(GB, na.rm = TRUE),
+  ) %>%
+  mutate(
+    percent_weighted_citation_proportion = total_weighted_citation_proportion / sum(total_weighted_citation_proportion),
+    percent_total_document_proportion = total_document_proportion / sum(total_document_proportion)
+  )
+
+
+
+
+# View the summarized data
+print(summarized_data)
+
+summarized_data %>%
+     select(percent_weighted_citation_proportion, percent_total_document_proportion) %>%
+     cor()
+```
+
+```{r cache=TRUE}
+
+# Estimate the effects of covariates on topic prevalence
+prevalence_estimates <- estimateEffect(formula = prevalence_formula, 
+                                       stm = Research_topics, 
+                                       metadata = out_text$meta)
+
+# Summary of estimates
+summary(prevalence_estimates)
+
+```
+
+```{r cache=TRUE}
+library(stminsights)
+
+# Variables list from the formula
+variables <- c("US", "FR", "IT", "CN", "ES", "AU", "PL", "RU", "DE", "IN", "NL", "GB", "JP", "CA", "KR", 
+               "NorthAmerica", "Europe", "Africa", "Asia", "Oceania")
+
+# Loop through variables and get effects
+all_effects <- lapply(variables, function(var) {
+  get_effects(estimates = prevalence_estimates, 
+              variable = var, 
+              type = 'pointestimate')
+})
+
+# Combine all effects into one data frame
+all_effects_df <- do.call(rbind, all_effects)
+
+all_effects_df <- data.frame(STM_time_period = rep("1990-1994", nrow(all_effects_df)), all_effects_df)
+all_effects_df <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(all_effects_df)), all_effects_df)
+all_effects_df_4 <- all_effects_df
+
+library(dplyr)
+library(stringr)
+
+# Capture the summary output of the linear model
+summary_output <- capture.output(summary(prevalence_estimates))
+lines <- unlist(strsplit(summary_output, "\n"))
+final_df <- data.frame(Covariate = character(), Estimate = character(), Std.Error = character(),
+                       t.value = character(), Pr = character(), Signif = character(),
+                       Topic = integer(), stringsAsFactors = FALSE)
+
+# Function to get significance level, directly handling strings with "<"
+get_signif <- function(p_value) {
+  if (is.na(p_value)) return("NA") # Handle NA values
+  if (grepl("<", p_value)) return("***") # Assume all "<" values indicate significance at the highest level
+  num_p_value <- as.numeric(p_value) # Convert to numeric, assuming it's already a clean numeric string
+  if (is.na(num_p_value)) return(" ") # If conversion fails, return blank
+  if (num_p_value < 0.001) return("***")
+  if (num_p_value < 0.01) return("**")
+  if (num_p_value < 0.05) return("*")
+  if (num_p_value < 0.1) return(".")
+  return(" ")
+}
+
+# Initialize current topic number
+current_topic <- NA
+
+# Iterate over the lines to extract coefficients
+for (i in seq_along(lines)) {
+  if (grepl("^Topic [0-9]+:", lines[i])) {
+    current_topic <- as.numeric(gsub("Topic ([0-9]+):", "\\1", lines[i]))
+  } else if (!is.na(current_topic) && grepl("^\\s*[A-Za-z0-9()]+\\s+", lines[i])) {
+    parts <- strcapture("^\\s*([A-Za-z0-9()]+)\\s+([-0-9.eE+]+)\\s+([-0-9.eE+]+)\\s+([-0-9.eE+]+)\\s+([<0-9.eE-]+)", lines[i], proto=list(Covariate="", Estimate=NA_character_, Std.Error=NA_character_, t.value=NA_character_, Pr=""))
+    if (!is.na(parts$Estimate)) {  # Ensure that we successfully captured numeric data
+      new_row <- data.frame(Covariate = parts$Covariate,
+                            Estimate = format(as.numeric(parts$Estimate), scientific = TRUE),
+                            Std.Error = parts$Std.Error,
+                            t.value = parts$t.value,
+                            Pr = parts$Pr,
+                            Signif = get_signif(parts$Pr),
+                            Topic = current_topic,
+                            stringsAsFactors = FALSE)
+      final_df <- rbind(final_df, new_row)
+    }
+  }
+}
+
+# Print the final data frame
+print(final_df)
+
+
+#write.csv(results_df, file = "Topic_Covariate_Effects.csv", row.names = FALSE)
+
+
+```
+ 
+```{r cache=TRUE}
+# Print the top 10 labels for each topic
+topic_labels <- labelTopics(Research_topics, n=15)
+print(topic_labels)
+```
+```{r cache=TRUE}
+
+# Calculate the publication count for each country
+country_columns <- c("US", "FR", "IT", "CN", "ES", "AU", "PL", "RU", "DE", 
+                     "IN", "NL", "GB", "JP", "CA", "KR", "NorthAmerica", 
+                     "SouthAmerica", "Europe", "Africa", "Asia", "Oceania")
+
+# Calculate the number of non-zero entries for each country
+publications_count <- sapply(country_columns, function(country) sum(data[[country]] > 0))
+
+# Check the counts
+print(publications_count)
+
+# Create a named vector where names are the country columns
+names(publications_count) <- country_columns
+
+# Match the country counts with the 'Covariates' in 'final_df'
+# and replicate the counts for each country across its multiple occurrences
+final_df$publications_count <- publications_count[match(final_df$Covariate, names(publications_count))]
+
+```
+```{r cache=TRUE}
+# Calculate the sum of citation counts for each country
+citation_counts <- sapply(country_columns, function(country) {
+  sum(data[data[[country]] > 0, "total_filtered_citations"], na.rm = TRUE)
+})
+
+# Create a named vector where names are the country columns
+names(citation_counts) <- country_columns
+
+# Add the citation counts as a new column in 'final_df'
+final_df$citation_count <- citation_counts[match(final_df$Covariate, names(citation_counts))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0.
+final_df$citation_count[is.na(final_df$citation_count)] <- 0
+
+
+
+# Calculate the total sum of citation counts for normalization
+total_citations <- sum(citation_counts)
+
+# Calculate the citation percentage for each country
+citation_percentage <- citation_counts / total_citations
+
+# Add the citation percentage as a new column in 'final_df'
+final_df$citation_percentage <- citation_percentage[match(final_df$Covariate, names(citation_percentage))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0.
+final_df$citation_percentage[is.na(final_df$citation_percentage)] <- 0
+
+
+# Calculate the sum of deflated citation counts for each country
+deflated_citation_counts <- sapply(country_columns, function(country) {
+  sum(data[data[[country]] > 0, "Deflated_Citations"], na.rm = TRUE)
+})
+
+# Create a named vector where names are the country columns for deflated citation counts
+names(deflated_citation_counts) <- country_columns
+
+# Add the deflated citation counts as a new column in 'final_df'
+final_df$deflated_citation_count <- deflated_citation_counts[match(final_df$Covariate, names(deflated_citation_counts))]
+
+# Calculate the total sum of deflated citation counts for normalization
+total_deflated_citations <- sum(deflated_citation_counts)
+
+# Calculate the deflated citation percentage for each country
+deflated_citation_percentage <- deflated_citation_counts / total_deflated_citations
+
+# Add the deflated citation percentage as a new column in 'final_df'
+final_df$deflated_citation_percentage <- deflated_citation_percentage[match(final_df$Covariate, names(deflated_citation_percentage))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0 for both new columns.
+final_df$deflated_citation_count[is.na(final_df$deflated_citation_count)] <- 0
+final_df$deflated_citation_percentage[is.na(final_df$deflated_citation_percentage)] <- 0
+
+```
+
+```{r cache=TRUE}
+final_df <- data.frame(STM_time_period = rep("2005-2009", nrow(final_df)), final_df)
+final_df <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(final_df)), final_df)
+final_df <- final_df[final_df$Covariate != "Signif.", ]
+country_df_4 <- final_df
+
+data <- data.frame(STM_time_period = rep("2005-2009", nrow(data)), data)
+data <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(data)), data)
+# Calculate the prevelance across all topics
+data <- data %>%
+  group_by(topic) %>%
+  mutate(
+    total_proportion_by_topic = sum(proportion),
+    topic_prevalence_percentage = (proportion / total_proportion_by_topic) * 100
+  ) %>%
+  ungroup()
+# Join summarized_data on data
+data <- data %>%
+  left_join(summarized_data, by = "topic")
+
+write.csv(data, file = "topics_2005_2009.csv", row.names = FALSE)
+
+summarized_data_2 = data[, 34:45]
+
+summarized_data_2 <- summarized_data_2 %>%
+  group_by(topic) %>%
+  summarise(
+    sum_proportion = sum(proportion, na.rm = TRUE),
+    avg_proportion = mean(proportion, na.rm = TRUE),
+    sum_total_filtered_citations = sum(total_filtered_citations, na.rm = TRUE),
+    avg_total_filtered_citations = mean(total_filtered_citations, na.rm = TRUE),
+    sum_Deflated_Citations = sum(Deflated_Citations, na.rm = TRUE),
+    avg_Deflated_Citations = mean(Deflated_Citations, na.rm = TRUE),
+    sum_citations_percentage = sum(citations_percentage, na.rm = TRUE),
+    avg_citations_percentage = mean(citations_percentage, na.rm = TRUE),
+    sum_deflated_citations_percentage = sum(deflated_citations_percentage, na.rm = TRUE),
+    avg_deflated_citations_percentage = mean(deflated_citations_percentage, na.rm = TRUE),
+    sum_weighted_citation_proportion = sum(weighted_citation_proportion, na.rm = TRUE),
+    avg_weighted_citation_proportion = mean(weighted_citation_proportion, na.rm = TRUE),
+    sum_percentage_citation_proportion = sum(percentage_citation_proportion, na.rm = TRUE),
+    avg_percentage_citation_proportion = mean(percentage_citation_proportion, na.rm = TRUE),
+    sum_weighted_deflated_citation_proportion = sum(weighted_deflated_citation_proportion, na.rm = TRUE),
+    avg_weighted_deflated_citation_proportion = mean(weighted_deflated_citation_proportion, na.rm = TRUE),
+    sum_percentage_deflated_citation_proportion = sum(percentage_deflated_citation_proportion, na.rm = TRUE),
+    avg_percentage_deflated_citation_proportion = mean(percentage_deflated_citation_proportion, na.rm = TRUE),
+    sum_total_proportion_by_topic = sum(total_proportion_by_topic, na.rm = TRUE),
+    avg_total_proportion_by_topic = mean(total_proportion_by_topic, na.rm = TRUE),
+    sum_topic_prevalence_percentage = sum(topic_prevalence_percentage, na.rm = TRUE),
+    avg_topic_prevalence_percentage = mean(topic_prevalence_percentage, na.rm = TRUE)
+  )
+
+# Merge dataframes by 'topic'
+merged_data_4 <- merge(summarized_data_2, summarized_data, by = "topic", all = TRUE)
+
+
+```
+
+```{r cache=TRUE}
+coauthorship_df = read.csv("INPUT_SQL_Coauthorships_Astronomy_and_Astrophysics.csv")
+ROR_df = read.csv("INPUT_ROR_Metadata.csv")
+colnames(coauthorship_df)
+colnames(ROR_df)
+
+ROR_df <- ROR_df %>%
+  rename(work_id = id)
+
+
+coauthorship_df <- coauthorship_df %>%
+  left_join(ROR_df %>% select(work_id, name, types), by = "work_id")
+
+# check columns to ensure the join went as expected
+print(colnames(coauthorship_df))
+
+# Continue with counting co-authors if needed
+coauthorship_summary <- coauthorship_df %>%
+  group_by(work_id) %>%
+  count(country_code) %>%
+  rename(coauthor_count = n)
+
+# Calculate the proportion of co-authors from each country per work
+coauthor_proportions <- coauthorship_summary %>%
+  group_by(work_id) %>%
+  mutate(total_coauthors = sum(coauthor_count),
+         coauthor_percentage = coauthor_count / total_coauthors) %>% #dividing the coauthor_count for each country by the total number of co-authors (total_coauthors) for that particular work_id
+  select(-total_coauthors)
+
+
+print(coauthor_proportions)
+
+# Merge 'data' with 'coauthor_proportions' on work_id
+coauthorship_data_df <- merge(coauthor_proportions, data[, c("work_id", "topic", "proportion")], by = "work_id")
+
+# Calculate country contribution percentages for each document
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(work_id) %>%
+  mutate(country_percentage = coauthor_count / sum(coauthor_count)) %>%
+  select(-coauthor_count)  # Dropping coauthor_count to keep country_percentage
+
+# Adding a new column "STM_Model" to the left
+coauthorship_data_df <- data.frame(STM_model = rep("STM4", nrow(coauthorship_data_df)), coauthorship_data_df)
+
+# Multiply country coauthor percentages by topic weights
+coauthorship_data_df <- coauthorship_data_df %>%
+  mutate(coauthor_topic_load = country_percentage * proportion) %>%
+  select(-country_percentage, -proportion)  # Dropping country_percentage and proportion
+
+# Aggregate by STM model, topic, and country, summing the coauthor-topic loads
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(STM_model, topic, country_code) %>%
+  summarise(coauthor_topic_load_sum = sum(coauthor_topic_load), .groups = "drop")
+
+# Convert the coauthor-topic loads to percentages by model and topic
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(STM_model, topic) %>%
+  mutate(coauthor_topic_load_percentage = coauthor_topic_load_sum / sum(coauthor_topic_load_sum)) %>%
+  select(-coauthor_topic_load_sum)  # Dropping coauthor_topic_load_sum
+
+
+coauthorship_data_df_4 <- coauthorship_data_df
+
+
+```
+
+```{r cache=TRUE}
+
+library(stringr)
+library(wordcloud)
+library(tidyr)
+#Read csv file
+data = read.csv("preprocessed_data_Feb_2024.csv")
+data <- subset(data, year >= 2010 & year <= 2015)
+
+citation_data = read.csv("abstracts_citation_counts.csv")
+citation_data <- subset(citation_data, year >= 2010 & year <= 2015)
+
+# Save the original title data for future use
+data$original_concatenated_title_abstract <- data$concatenated_title_abstract
+
+
+#set.seed(123)  
+#sample_size <- 21000  
+#sample_size <- 8000
+#sample_rows <- sample(nrow(data), sample_size)
+#data <- data[sample_rows, ]
+
+```
+
+```{r cache=TRUE}
+
+library('stm')
+
+#pre-processing the titles using textProcessor from the stm package
+processed_text <- textProcessor(data$concatenated_title_abstract, metadata = data) 
+
+# Further prepare the data by removing low-frequency terms
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta)
+docs_text <- out_text$documents
+vocab_text <- out_text$vocab
+meta_text <- out_text$meta
+
+
+#Prepare data
+plotRemoved(processed_text$documents, lower.thresh = seq(1, 200, by = 100))
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta, lower.thresh = 15)
+
+str(out_text$meta)
+
+# Initialize an empty formula string
+prevalence_formula_str <- "~ US + FR + IT + CN + ES + AU + PL + RU + DE + IN + NL + GB + JP + CA + KR + NorthAmerica + Europe + Africa + Asia + Oceania"
+
+# Convert the string to a formula
+prevalence_formula <- as.formula(prevalence_formula_str)
+print(prevalence_formula)
+
+```
+
+```{r cache=TRUE}
+# Run STM model
+Research_topics <- stm(documents = out_text$documents, 
+                             vocab = out_text$vocab, 
+                             K = 35, 
+                             prevalence = prevalence_formula, 
+                             data = out_text$meta, 
+                             init.type = "Spectral",
+                             max.em.its = 1000,
+                             gamma.prior = 'L1')
+
+```
+
+```{r cache=TRUE}
+# Plot the STM model summary
+plot(Research_topics, type = "summary", xlim = c(0, 0.3))
+
+# Print the top 10 labels for each topic
+topic_labels <- labelTopics(Research_topics, n=10)
+print(topic_labels)
+
+# Match the processed documents with the original titles
+matched_titles <- out_text$meta$original_concatenated_title_abstract
+
+# Print top 5 documents for each topic
+top_docs <- findThoughts(Research_topics, texts = matched_titles, n = 5)$docs[[1]]
+print(top_docs)
+
+# Find and plot the key "thoughts" or documents for selected topics
+thoughts6 <- findThoughts(Research_topics, texts = matched_titles, n = 3, topics = 6)$docs[[1]]
+thoughts18 <- findThoughts(Research_topics, texts = matched_titles, n = 3, topics = 18)$docs[[1]]
+par(mfrow = c(1, 2), mar = c(0.5, 0.5, 1, 0.5))
+plotQuote(thoughts6, width = 30, main = "Topic 6")
+plotQuote(thoughts18, width = 30, main = "Topic 18")
+
+# Calculate and plot the correlation between topics
+mod.out.corr <- topicCorr(Research_topics)
+plot(mod.out.corr, cex = 1.5)
+
+
+# For each topic
+for (topic_num in 1:35) {
+  # Plot the word cloud
+  cloud(Research_topics, topic = topic_num, scale = c(2, 0.25))
+  Sys.sleep(2)
+}
+
+```
+
+```{r cache=TRUE}
+
+topic_proportions <- Research_topics$theta
+
+# 'data' has a unique identifier for each document (doc_id)
+data$doc_id <- 1:nrow(data)
+
+# Convert the topic proportions to a dataframe or matrix where rows correspond to documents
+# and columns to topics, if it's not already in that format.
+# and each column is a topic.
+
+# Now, convert this matrix/dataframe to a long format
+library(tidyr)
+topic_proportions_long <- as.data.frame(topic_proportions) %>%
+  mutate(doc_id = row.names(.)) %>%
+  pivot_longer(cols = -doc_id, names_to = "topic", values_to = "proportion")
+
+data <- merge(data, topic_proportions_long, by = "doc_id")
+
+# Arrange the data by doc_id ascending and proportion descending
+data <- data %>%
+  arrange(doc_id, desc(proportion))
+
+```
+
+```{r cache=TRUE}
+
+# Select only the necessary columns from citation_data
+citation_data_selected <- citation_data[, c("concept_id", "work_id", "title", "abstract", "total_filtered_citations", "Deflated_Citations", "citations_percentage", "deflated_citations_percentage")]
+
+# Merge the selected citation data with the main dataset
+data <- merge(data, citation_data_selected, by = c("concept_id", "work_id", "title", "abstract"), all.x = TRUE)
+
+
+# Weight the Topic Proportions by Citations
+data$weighted_citation_proportion <- data$proportion * data$total_filtered_citations
+
+# Percentage of the Topic Proportions by Citations
+total_sum_citation <- sum(data$weighted_citation_proportion, na.rm = TRUE)
+data$percentage_citation_proportion <- (data$weighted_citation_proportion / total_sum_citation) * 100
+
+
+
+# Weight the Topic Proportions by Deflated Citations
+data$weighted_deflated_citation_proportion <- data$proportion * data$Deflated_Citations
+
+# Percentage of the Topic Proportions by Deflated Citations
+total_sum <- sum(data$weighted_deflated_citation_proportion, na.rm = TRUE)
+data$percentage_deflated_citation_proportion <- (data$weighted_deflated_citation_proportion / total_sum) * 100
+
+
+summarized_data <- data %>%
+  group_by(topic) %>%
+  summarise(
+    total_weighted_citation_proportion = sum(weighted_deflated_citation_proportion, na.rm = TRUE),
+    average_weighted_citation_proportion = mean(weighted_deflated_citation_proportion, na.rm = TRUE),
+    total_document_proportion = sum(proportion, na.rm = TRUE),
+    average_document_proportion = mean(proportion, na.rm = TRUE)
+    # Uncomment and edit the following lines to include sums for US and GB if needed
+    # US_sum = sum(US, na.rm = TRUE),
+    # GB_sum = sum(GB, na.rm = TRUE),
+  ) %>%
+  mutate(
+    percent_weighted_citation_proportion = total_weighted_citation_proportion / sum(total_weighted_citation_proportion),
+    percent_total_document_proportion = total_document_proportion / sum(total_document_proportion)
+  )
+
+
+
+
+# View the summarized data
+print(summarized_data)
+
+summarized_data %>%
+     select(percent_weighted_citation_proportion, percent_total_document_proportion) %>%
+     cor()
+```
+
+```{r cache=TRUE}
+
+# Estimate the effects of covariates on topic prevalence
+prevalence_estimates <- estimateEffect(formula = prevalence_formula, 
+                                       stm = Research_topics, 
+                                       metadata = out_text$meta)
+
+# Summary of estimates
+summary(prevalence_estimates)
+
+```
+
+```{r cache=TRUE}
+library(stminsights)
+
+# Variables list from the formula
+variables <- c("US", "FR", "IT", "CN", "ES", "AU", "PL", "RU", "DE", "IN", "NL", "GB", "JP", "CA", "KR", 
+               "NorthAmerica", "Europe", "Africa", "Asia", "Oceania")
+
+# Loop through variables and get effects
+all_effects <- lapply(variables, function(var) {
+  get_effects(estimates = prevalence_estimates, 
+              variable = var, 
+              type = 'pointestimate')
+})
+
+# Combine all effects into one data frame
+all_effects_df <- do.call(rbind, all_effects)
+
+all_effects_df <- data.frame(STM_time_period = rep("1990-1994", nrow(all_effects_df)), all_effects_df)
+all_effects_df <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(all_effects_df)), all_effects_df)
+all_effects_df_5 <- all_effects_df
+
+library(dplyr)
+library(stringr)
+
+# Capture the summary output of the linear model
+summary_output <- capture.output(summary(prevalence_estimates))
+lines <- unlist(strsplit(summary_output, "\n"))
+final_df <- data.frame(Covariate = character(), Estimate = character(), Std.Error = character(),
+                       t.value = character(), Pr = character(), Signif = character(),
+                       Topic = integer(), stringsAsFactors = FALSE)
+
+# Function to get significance level, directly handling strings with "<"
+get_signif <- function(p_value) {
+  if (is.na(p_value)) return("NA") # Handle NA values
+  if (grepl("<", p_value)) return("***") # Assume all "<" values indicate significance at the highest level
+  num_p_value <- as.numeric(p_value) # Convert to numeric, assuming it's already a clean numeric string
+  if (is.na(num_p_value)) return(" ") # If conversion fails, return blank
+  if (num_p_value < 0.001) return("***")
+  if (num_p_value < 0.01) return("**")
+  if (num_p_value < 0.05) return("*")
+  if (num_p_value < 0.1) return(".")
+  return(" ")
+}
+
+# Initialize current topic number
+current_topic <- NA
+
+# Iterate over the lines to extract coefficients
+for (i in seq_along(lines)) {
+  if (grepl("^Topic [0-9]+:", lines[i])) {
+    current_topic <- as.numeric(gsub("Topic ([0-9]+):", "\\1", lines[i]))
+  } else if (!is.na(current_topic) && grepl("^\\s*[A-Za-z0-9()]+\\s+", lines[i])) {
+    parts <- strcapture("^\\s*([A-Za-z0-9()]+)\\s+([-0-9.eE+]+)\\s+([-0-9.eE+]+)\\s+([-0-9.eE+]+)\\s+([<0-9.eE-]+)", lines[i], proto=list(Covariate="", Estimate=NA_character_, Std.Error=NA_character_, t.value=NA_character_, Pr=""))
+    if (!is.na(parts$Estimate)) {  # Ensure that we successfully captured numeric data
+      new_row <- data.frame(Covariate = parts$Covariate,
+                            Estimate = format(as.numeric(parts$Estimate), scientific = TRUE),
+                            Std.Error = parts$Std.Error,
+                            t.value = parts$t.value,
+                            Pr = parts$Pr,
+                            Signif = get_signif(parts$Pr),
+                            Topic = current_topic,
+                            stringsAsFactors = FALSE)
+      final_df <- rbind(final_df, new_row)
+    }
+  }
+}
+
+# Print the final data frame
+print(final_df)
+
+
+#write.csv(results_df, file = "Topic_Covariate_Effects.csv", row.names = FALSE)
+
+
+```
+ 
+```{r cache=TRUE}
+# Print the top 10 labels for each topic
+topic_labels <- labelTopics(Research_topics, n=15)
+print(topic_labels)
+```
+```{r cache=TRUE}
+
+# Calculate the publication count for each country
+country_columns <- c("US", "FR", "IT", "CN", "ES", "AU", "PL", "RU", "DE", 
+                     "IN", "NL", "GB", "JP", "CA", "KR", "NorthAmerica", 
+                     "SouthAmerica", "Europe", "Africa", "Asia", "Oceania")
+
+# Calculate the number of non-zero entries for each country
+publications_count <- sapply(country_columns, function(country) sum(data[[country]] > 0))
+
+# Check the counts
+print(publications_count)
+
+# Create a named vector where names are the country columns
+names(publications_count) <- country_columns
+
+# Match the country counts with the 'Covariates' in 'final_df'
+# and replicate the counts for each country across its multiple occurrences
+final_df$publications_count <- publications_count[match(final_df$Covariate, names(publications_count))]
+
+```
+```{r cache=TRUE}
+# Calculate the sum of citation counts for each country
+citation_counts <- sapply(country_columns, function(country) {
+  sum(data[data[[country]] > 0, "total_filtered_citations"], na.rm = TRUE)
+})
+
+# Create a named vector where names are the country columns
+names(citation_counts) <- country_columns
+
+# Add the citation counts as a new column in 'final_df'
+final_df$citation_count <- citation_counts[match(final_df$Covariate, names(citation_counts))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0.
+final_df$citation_count[is.na(final_df$citation_count)] <- 0
+
+
+
+# Calculate the total sum of citation counts for normalization
+total_citations <- sum(citation_counts)
+
+# Calculate the citation percentage for each country
+citation_percentage <- citation_counts / total_citations
+
+# Add the citation percentage as a new column in 'final_df'
+final_df$citation_percentage <- citation_percentage[match(final_df$Covariate, names(citation_percentage))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0.
+final_df$citation_percentage[is.na(final_df$citation_percentage)] <- 0
+
+
+# Calculate the sum of deflated citation counts for each country
+deflated_citation_counts <- sapply(country_columns, function(country) {
+  sum(data[data[[country]] > 0, "Deflated_Citations"], na.rm = TRUE)
+})
+
+# Create a named vector where names are the country columns for deflated citation counts
+names(deflated_citation_counts) <- country_columns
+
+# Add the deflated citation counts as a new column in 'final_df'
+final_df$deflated_citation_count <- deflated_citation_counts[match(final_df$Covariate, names(deflated_citation_counts))]
+
+# Calculate the total sum of deflated citation counts for normalization
+total_deflated_citations <- sum(deflated_citation_counts)
+
+# Calculate the deflated citation percentage for each country
+deflated_citation_percentage <- deflated_citation_counts / total_deflated_citations
+
+# Add the deflated citation percentage as a new column in 'final_df'
+final_df$deflated_citation_percentage <- deflated_citation_percentage[match(final_df$Covariate, names(deflated_citation_percentage))]
+
+# If any Covariates do not match, they will be NA. Here we replace NA with 0 for both new columns.
+final_df$deflated_citation_count[is.na(final_df$deflated_citation_count)] <- 0
+final_df$deflated_citation_percentage[is.na(final_df$deflated_citation_percentage)] <- 0
+
+```
+
+```{r cache=TRUE}
+final_df <- data.frame(STM_time_period = rep("2010-2015", nrow(final_df)), final_df)
+final_df <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(final_df)), final_df)
+final_df <- final_df[final_df$Covariate != "Signif.", ]
+country_df_5 <- final_df
+
+data <- data.frame(STM_time_period = rep("2010-2015", nrow(data)), data)
+data <- data.frame(Field = rep("Astronomy/Astrophysics", nrow(data)), data)
+# Calculate the prevelance across all topics
+data <- data %>%
+  group_by(topic) %>%
+  mutate(
+    total_proportion_by_topic = sum(proportion),
+    topic_prevalence_percentage = (proportion / total_proportion_by_topic) * 100
+  ) %>%
+  ungroup()
+# Join summarized_data on data
+data <- data %>%
+  left_join(summarized_data, by = "topic")
+
+write.csv(data, file = "topics_2010_2015.csv", row.names = FALSE)
+
+summarized_data_2 = data[, 34:45]
+
+summarized_data_2 <- summarized_data_2 %>%
+  group_by(topic) %>%
+  summarise(
+    sum_proportion = sum(proportion, na.rm = TRUE),
+    avg_proportion = mean(proportion, na.rm = TRUE),
+    sum_total_filtered_citations = sum(total_filtered_citations, na.rm = TRUE),
+    avg_total_filtered_citations = mean(total_filtered_citations, na.rm = TRUE),
+    sum_Deflated_Citations = sum(Deflated_Citations, na.rm = TRUE),
+    avg_Deflated_Citations = mean(Deflated_Citations, na.rm = TRUE),
+    sum_citations_percentage = sum(citations_percentage, na.rm = TRUE),
+    avg_citations_percentage = mean(citations_percentage, na.rm = TRUE),
+    sum_deflated_citations_percentage = sum(deflated_citations_percentage, na.rm = TRUE),
+    avg_deflated_citations_percentage = mean(deflated_citations_percentage, na.rm = TRUE),
+    sum_weighted_citation_proportion = sum(weighted_citation_proportion, na.rm = TRUE),
+    avg_weighted_citation_proportion = mean(weighted_citation_proportion, na.rm = TRUE),
+    sum_percentage_citation_proportion = sum(percentage_citation_proportion, na.rm = TRUE),
+    avg_percentage_citation_proportion = mean(percentage_citation_proportion, na.rm = TRUE),
+    sum_weighted_deflated_citation_proportion = sum(weighted_deflated_citation_proportion, na.rm = TRUE),
+    avg_weighted_deflated_citation_proportion = mean(weighted_deflated_citation_proportion, na.rm = TRUE),
+    sum_percentage_deflated_citation_proportion = sum(percentage_deflated_citation_proportion, na.rm = TRUE),
+    avg_percentage_deflated_citation_proportion = mean(percentage_deflated_citation_proportion, na.rm = TRUE),
+    sum_total_proportion_by_topic = sum(total_proportion_by_topic, na.rm = TRUE),
+    avg_total_proportion_by_topic = mean(total_proportion_by_topic, na.rm = TRUE),
+    sum_topic_prevalence_percentage = sum(topic_prevalence_percentage, na.rm = TRUE),
+    avg_topic_prevalence_percentage = mean(topic_prevalence_percentage, na.rm = TRUE)
+  )
+
+# Merge dataframes by 'topic'
+merged_data_5 <- merge(summarized_data_2, summarized_data, by = "topic", all = TRUE)
+
+
+```
+
+```{r cache=TRUE}
+coauthorship_df = read.csv("INPUT_SQL_Coauthorships_Astronomy_and_Astrophysics.csv")
+ROR_df = read.csv("INPUT_ROR_Metadata.csv")
+colnames(coauthorship_df)
+colnames(ROR_df)
+
+ROR_df <- ROR_df %>%
+  rename(work_id = id)
+
+
+coauthorship_df <- coauthorship_df %>%
+  left_join(ROR_df %>% select(work_id, name, types), by = "work_id")
+
+# check columns to ensure the join went as expected
+print(colnames(coauthorship_df))
+
+# Continue with counting co-authors if needed
+coauthorship_summary <- coauthorship_df %>%
+  group_by(work_id) %>%
+  count(country_code) %>%
+  rename(coauthor_count = n)
+
+# Calculate the proportion of co-authors from each country per work
+coauthor_proportions <- coauthorship_summary %>%
+  group_by(work_id) %>%
+  mutate(total_coauthors = sum(coauthor_count),
+         coauthor_percentage = coauthor_count / total_coauthors) %>% #dividing the coauthor_count for each country by the total number of co-authors (total_coauthors) for that particular work_id
+  select(-total_coauthors)
+
+
+print(coauthor_proportions)
+
+# Merge 'data' with 'coauthor_proportions' on work_id
+coauthorship_data_df <- merge(coauthor_proportions, data[, c("work_id", "topic", "proportion")], by = "work_id")
+
+# Calculate country contribution percentages for each document
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(work_id) %>%
+  mutate(country_percentage = coauthor_count / sum(coauthor_count)) %>%
+  select(-coauthor_count)  # Dropping coauthor_count to keep country_percentage
+
+# Adding a new column "STM_Model" to the left
+coauthorship_data_df <- data.frame(STM_model = rep("STM5", nrow(coauthorship_data_df)), coauthorship_data_df)
+
+# Multiply country coauthor percentages by topic weights
+coauthorship_data_df <- coauthorship_data_df %>%
+  mutate(coauthor_topic_load = country_percentage * proportion) %>%
+  select(-country_percentage, -proportion)  # Dropping country_percentage and proportion
+
+# Aggregate by STM model, topic, and country, summing the coauthor-topic loads
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(STM_model, topic, country_code) %>%
+  summarise(coauthor_topic_load_sum = sum(coauthor_topic_load), .groups = "drop")
+
+# Convert the coauthor-topic loads to percentages by model and topic
+coauthorship_data_df <- coauthorship_data_df %>%
+  group_by(STM_model, topic) %>%
+  mutate(coauthor_topic_load_percentage = coauthor_topic_load_sum / sum(coauthor_topic_load_sum)) %>%
+  select(-coauthor_topic_load_sum)  # Dropping coauthor_topic_load_sum
+
+
+coauthorship_data_df_5 <- coauthorship_data_df
+
+
+```
+
+```{r cache=TRUE}
+combined_country <- bind_rows(country_df_1, country_df_2, country_df_3, country_df_4, country_df_5)
+combined_merged_topics <- bind_rows(merged_data_1, merged_data_2, merged_data_3, merged_data_4, merged_data_5)
+
+combined_coauthorship_data_df <- bind_rows(coauthorship_data_df_1, coauthorship_data_df_2, coauthorship_data_df_3, coauthorship_data_df_4, coauthorship_data_df_5)
+
+combined_all_effects_df <- bind_rows(all_effects_df_1, all_effects_df_2, all_effects_df_3, all_effects_df_4, all_effects_df_5)
+
+write.csv(combined_country, file = "PROJECT_Apollo_Country_Covariates.csv", row.names = FALSE)
+write.csv(combined_merged_topics, file = "PROJECT_Apollo_Topic_Summary.csv", row.names = FALSE)
+write.csv(combined_coauthorship_data_df, file = "PROJECT_Apollo_Coauthorship_Summary.csv", row.names = FALSE)
+write.csv(combined_all_effects_df, file = "PROJECT_Apollo_All_Effects.csv", row.names = FALSE)
+```

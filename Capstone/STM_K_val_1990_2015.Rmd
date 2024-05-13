@@ -1,0 +1,335 @@
+---
+title: "STM_K_val_1990_2015"
+author: "Harshvardhan Singh, Charles J. Gomez"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r cache=TRUE}
+
+library(stringr)
+library(wordcloud)
+#Read csv file
+data = read.csv("preprocessed_data_Feb_2024.csv")
+data <- subset(data, year >= 1990 & year <= 1994)
+
+# Save the original title data for future use
+data$original_concatenated_title_abstract <- data$concatenated_title_abstract
+
+
+#set.seed(123)  
+#sample_size <- 21000  
+#sample_size <- 8000
+#sample_rows <- sample(nrow(data), sample_size)
+#data <- data[sample_rows, ]
+
+
+library('stm')
+
+#pre-processing the titles using textProcessor from the stm package
+processed_text <- textProcessor(data$concatenated_title_abstract, metadata = data) 
+
+# Further prepare the data by removing low-frequency terms
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta)
+docs_text <- out_text$documents
+vocab_text <- out_text$vocab
+meta_text <- out_text$meta
+
+
+#Prepare data
+plotRemoved(processed_text$documents, lower.thresh = seq(1, 200, by = 100))
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta, lower.thresh = 15)
+
+str(out_text$meta)
+
+# Initialize an empty formula string
+prevalence_formula_str <- "~"
+
+
+# Add each country variable to the formula string
+for (i in 9:29) {
+  prevalence_formula_str <- paste(prevalence_formula_str, "+", names(data)[i])
+}
+
+
+# Convert the string to a formula
+prevalence_formula <- as.formula(prevalence_formula_str)
+print(prevalence_formula)
+
+Kvals <- seq(from = 10, to = 50, by = 5)  # K values to try
+search_results <- searchK(documents = out_text$documents, 
+                          vocab = out_text$vocab, 
+                          K = Kvals, 
+                          prevalence = prevalence_formula, 
+                          data = out_text$meta, 
+                          init.type = "Spectral", 
+                          verbose = FALSE)
+
+#Plot the results
+plot(search_results)
+
+```
+
+```{r cache=TRUE}
+
+library(stringr)
+library(wordcloud)
+#Read csv file
+data = read.csv("preprocessed_data_Feb_2024.csv")
+data <- subset(data, year >= 1995 & year <= 1999)
+
+# Save the original title data for future use
+data$original_concatenated_title_abstract <- data$concatenated_title_abstract
+
+
+#set.seed(123)  
+#sample_size <- 21000  
+#sample_size <- 8000
+#sample_rows <- sample(nrow(data), sample_size)
+#data <- data[sample_rows, ]
+
+
+library('stm')
+
+#pre-processing the titles using textProcessor from the stm package
+processed_text <- textProcessor(data$concatenated_title_abstract, metadata = data) 
+
+# Further prepare the data by removing low-frequency terms
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta)
+docs_text <- out_text$documents
+vocab_text <- out_text$vocab
+meta_text <- out_text$meta
+
+
+#Prepare data
+plotRemoved(processed_text$documents, lower.thresh = seq(1, 200, by = 100))
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta, lower.thresh = 15)
+
+str(out_text$meta)
+
+# Initialize an empty formula string
+prevalence_formula_str <- "~"
+
+
+# Add each country variable to the formula string
+for (i in 9:29) {
+  prevalence_formula_str <- paste(prevalence_formula_str, "+", names(data)[i])
+}
+
+
+# Convert the string to a formula
+prevalence_formula <- as.formula(prevalence_formula_str)
+print(prevalence_formula)
+
+Kvals <- seq(from = 10, to = 50, by = 5)  # K values to try
+search_results <- searchK(documents = out_text$documents, 
+                          vocab = out_text$vocab, 
+                          K = Kvals, 
+                          prevalence = prevalence_formula, 
+                          data = out_text$meta, 
+                          init.type = "Spectral", 
+                          verbose = FALSE)
+
+#Plot the results
+plot(search_results)
+
+```
+
+```{r cache=TRUE}
+
+library(stringr)
+library(wordcloud)
+#Read csv file
+data = read.csv("preprocessed_data_Feb_2024.csv")
+data <- subset(data, year >= 2000 & year <= 2004)
+
+# Save the original title data for future use
+data$original_concatenated_title_abstract <- data$concatenated_title_abstract
+
+
+#set.seed(123)  
+#sample_size <- 21000  
+#sample_size <- 8000
+#sample_rows <- sample(nrow(data), sample_size)
+#data <- data[sample_rows, ]
+
+
+library('stm')
+
+#pre-processing the titles using textProcessor from the stm package
+processed_text <- textProcessor(data$concatenated_title_abstract, metadata = data) 
+
+# Further prepare the data by removing low-frequency terms
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta)
+docs_text <- out_text$documents
+vocab_text <- out_text$vocab
+meta_text <- out_text$meta
+
+
+#Prepare data
+plotRemoved(processed_text$documents, lower.thresh = seq(1, 200, by = 100))
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta, lower.thresh = 15)
+
+str(out_text$meta)
+
+# Initialize an empty formula string
+prevalence_formula_str <- "~"
+
+
+# Add each country variable to the formula string
+for (i in 9:29) {
+  prevalence_formula_str <- paste(prevalence_formula_str, "+", names(data)[i])
+}
+
+
+# Convert the string to a formula
+prevalence_formula <- as.formula(prevalence_formula_str)
+print(prevalence_formula)
+
+Kvals <- seq(from = 10, to = 50, by = 5)  # K values to try
+search_results <- searchK(documents = out_text$documents, 
+                          vocab = out_text$vocab, 
+                          K = Kvals, 
+                          prevalence = prevalence_formula, 
+                          data = out_text$meta, 
+                          init.type = "Spectral", 
+                          verbose = FALSE)
+
+#Plot the results
+plot(search_results)
+
+```
+
+```{r cache=TRUE}
+
+library(stringr)
+library(wordcloud)
+#Read csv file
+data = read.csv("preprocessed_data_Feb_2024.csv")
+data <- subset(data, year >= 2005 & year <= 2019)
+
+# Save the original title data for future use
+data$original_concatenated_title_abstract <- data$concatenated_title_abstract
+
+
+#set.seed(123)  
+#sample_size <- 21000  
+#sample_size <- 8000
+#sample_rows <- sample(nrow(data), sample_size)
+#data <- data[sample_rows, ]
+
+
+library('stm')
+
+#pre-processing the titles using textProcessor from the stm package
+processed_text <- textProcessor(data$concatenated_title_abstract, metadata = data) 
+
+# Further prepare the data by removing low-frequency terms
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta)
+docs_text <- out_text$documents
+vocab_text <- out_text$vocab
+meta_text <- out_text$meta
+
+
+#Prepare data
+plotRemoved(processed_text$documents, lower.thresh = seq(1, 200, by = 100))
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta, lower.thresh = 15)
+
+str(out_text$meta)
+
+# Initialize an empty formula string
+prevalence_formula_str <- "~"
+
+
+# Add each country variable to the formula string
+for (i in 9:29) {
+  prevalence_formula_str <- paste(prevalence_formula_str, "+", names(data)[i])
+}
+
+
+# Convert the string to a formula
+prevalence_formula <- as.formula(prevalence_formula_str)
+print(prevalence_formula)
+
+Kvals <- seq(from = 10, to = 50, by = 5)  # K values to try
+search_results <- searchK(documents = out_text$documents, 
+                          vocab = out_text$vocab, 
+                          K = Kvals, 
+                          prevalence = prevalence_formula, 
+                          data = out_text$meta, 
+                          init.type = "Spectral", 
+                          verbose = FALSE)
+
+#Plot the results
+plot(search_results)
+
+```
+
+```{r cache=TRUE}
+
+library(stringr)
+library(wordcloud)
+#Read csv file
+data = read.csv("preprocessed_data_Feb_2024.csv")
+data <- subset(data, year >= 2010 & year <= 2015)
+
+# Save the original title data for future use
+data$original_concatenated_title_abstract <- data$concatenated_title_abstract
+
+
+#set.seed(123)  
+#sample_size <- 21000  
+#sample_size <- 8000
+#sample_rows <- sample(nrow(data), sample_size)
+#data <- data[sample_rows, ]
+
+
+library('stm')
+
+#pre-processing the titles using textProcessor from the stm package
+processed_text <- textProcessor(data$concatenated_title_abstract, metadata = data) 
+
+# Further prepare the data by removing low-frequency terms
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta)
+docs_text <- out_text$documents
+vocab_text <- out_text$vocab
+meta_text <- out_text$meta
+
+
+#Prepare data
+plotRemoved(processed_text$documents, lower.thresh = seq(1, 200, by = 100))
+out_text <- prepDocuments(processed_text$documents, processed_text$vocab, processed_text$meta, lower.thresh = 15)
+
+str(out_text$meta)
+
+# Initialize an empty formula string
+prevalence_formula_str <- "~"
+
+
+# Add each country variable to the formula string
+for (i in 9:29) {
+  prevalence_formula_str <- paste(prevalence_formula_str, "+", names(data)[i])
+}
+
+
+# Convert the string to a formula
+prevalence_formula <- as.formula(prevalence_formula_str)
+print(prevalence_formula)
+
+Kvals <- seq(from = 10, to = 50, by = 5)  # K values to try
+search_results <- searchK(documents = out_text$documents, 
+                          vocab = out_text$vocab, 
+                          K = Kvals, 
+                          prevalence = prevalence_formula, 
+                          data = out_text$meta, 
+                          init.type = "Spectral", 
+                          verbose = FALSE)
+
+#Plot the results
+plot(search_results)
+
+```
